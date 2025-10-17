@@ -18,4 +18,14 @@ export default defineConfig({
       },
     },
   },
+  // 在这里添加 server 配置
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+  }
 })

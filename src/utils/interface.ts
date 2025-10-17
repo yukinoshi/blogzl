@@ -72,3 +72,21 @@ export type diaryData = {
   content: string;//内容
   picture?: string[];//图片
 }
+
+export type UserRegister = {
+  name: string;
+  password: string;
+  moment: string;
+}
+
+export type IsSuccess = {
+  code: number;
+}
+
+export type ReturnUserInfo = IsSuccess & {
+  data?: {
+    id: number;
+    name: string;
+    token: string;
+  }
+}
