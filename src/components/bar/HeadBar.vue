@@ -2,7 +2,6 @@
 import { useRouter } from 'vue-router';
 import Information from '../reply/information.vue';
 import { ref } from 'vue';
-
 const router = useRouter()
 const backHome = () => {
   router.push('/')
@@ -11,6 +10,7 @@ const active = ref(false)
 const changeActive = (e:boolean) => {
   active.value = e
 }
+
 </script>
 
 <template>
@@ -23,9 +23,12 @@ const changeActive = (e:boolean) => {
       <yk-badge is-dot>
         <IconEmailFill @click="changeActive(true)" style="font-size: 20px;" />
       </yk-badge>
-      <yk-avatar img-url="https://www.huohuo90.com:3003/user/6353b034dd4b583975e77fbe.png" alt=""></yk-avatar>
+      <!-- 默认图片 -->
+      <img src="../../assets/avatar.png" class="avatar" alt="">
       <div><yk-theme></yk-theme></div>
       <yk-button>退出</yk-button>
+      <img src="http://localhost:3000/files/1760773655285.png" alt="">
+
     </yk-space>
     <Information :page-size="8" :active="active" @close="changeActive(false)"></Information>
   </div>
@@ -48,6 +51,12 @@ const changeActive = (e:boolean) => {
   .name {
     font-weight: 600;
     font-size: 20px;
+  }
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
   }
 }
 </style>

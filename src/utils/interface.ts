@@ -90,3 +90,12 @@ export type ReturnUserInfo = IsSuccess & {
     token: string;
   }
 }
+
+export type OverViewInfo = IsSuccess & {
+  data?: {
+    file: string;
+    article: number;
+    gallery: number;
+    diary: number;
+  }
+}

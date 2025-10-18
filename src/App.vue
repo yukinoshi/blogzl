@@ -3,10 +3,11 @@ import HeadBar from './components/bar/HeadBar.vue';
 </script>
 
 <template>
-  <!-- 头部 -->
-  <HeadBar />
+  <!-- 头部：根据路由元信息决定是否显示 -->
+  <HeadBar v-if="$route.meta?.hideHeader !== true" />
   <!-- 内容 -->
   <router-view />
+  
 </template>
 
 <style scoped lang="less">

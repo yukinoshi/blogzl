@@ -9,11 +9,12 @@ import EditGalleryView from '../views/EditGalleryView.vue'
 import EditArticleView from '../views/EditArticleView.vue'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
+import NotFound from '../views/404.vue'
 import { verifyApi } from '../api/login';
 import { YkMessage } from '@yike-design/ui';
 import { isTokenExpired } from "../utils/auth";
 const routes = [
-  { 
+  {
     path: '/',
     component: IndexView,
     redirect: '/overview',
@@ -27,8 +28,10 @@ const routes = [
   },
   { path: '/editgallery', component: EditGalleryView },
   { path: '/editarticle', component: EditArticleView },
-  { path: '/login', component: LoginView },
-  { path: '/register', component: RegisterView },
+  { path: '/login', component: LoginView, meta: { hideHeader: true } },
+  { path: '/register', component: RegisterView, meta: { hideHeader: true } },
+  // 404 捕获路由
+  { path: '/:pathMatch(.*)*', component: NotFound, meta: { hideHeader: true } },
 ]
 
 const router = createRouter({
@@ -40,17 +43,16 @@ const router = createRouter({
 const whiteList = ['/login', '/register']
 
 router.beforeEach(async (to, _from, next) => {
-  const token = localStorage.getItem('token')
+  const user = JSON.parse(localStorage.getItem('user') || '{}')
   const isWhite = whiteList.includes(to.path)
-
-  // 未登录
-  if (!token) {
+  // 未登录 第一次登录
+  if (!user) {
     return isWhite ? next() : next('/login')
   }
 
   // 本地判定过期
-  if (isTokenExpired(token)) {
-    localStorage.removeItem('token')
+  if (isTokenExpired(user.token)) {
+    localStorage.removeItem('user')
     if (isWhite) return next()
     YkMessage({ type: 'warning', message: '登录已过期，请重新登录' })
     return next('/login')
@@ -59,22 +61,23 @@ router.beforeEach(async (to, _from, next) => {
   // 有 token 且未过期
   // 在登录/注册页面，若 token 有效则自动跳首页
   if (isWhite) {
-    try {
+    try {      
       await verifyApi()
       return next('/')
     } catch {
       // token 无效则清除并留在登录/注册页
-      localStorage.removeItem('token')
+      localStorage.removeItem('user')
       return next()
     }
   }
+
 
   // 访问受限页面：向后端校验 token
   try {
     await verifyApi()
     return next()
   } catch {
-    localStorage.removeItem('token')
+    localStorage.removeItem('user')
     YkMessage({ type: 'warning', message: '登录已过期，请重新登录' })
     return next('/login')
   }

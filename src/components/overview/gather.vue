@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import { overLink } from '../../utils/menu';
-import { overview } from '../../mock/data';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { getOverviewData } from '../../api/overview';
+
 const gathers = ref(overLink)
-const drawGatherData = () => {
-  let data = overview.data;
-  gathers.value[0].total = data.file;
-  gathers.value[1].total = data.article;
-  gathers.value[2].total = data.gallery;
-  gathers.value[3].total = data.diary;
+const drawGatherData = async () => {
+  const overviewData = await getOverviewData();
+  if (overviewData.code == 200 && overviewData.data) {
+    gathers.value[0].total = overviewData.data.file;
+    gathers.value[1].total = overviewData.data.article;
+    gathers.value[2].total = overviewData.data.gallery;
+    gathers.value[3].total = overviewData.data.diary;
+    
+  }
 }
 const router = useRouter()
 

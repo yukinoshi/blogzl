@@ -12,7 +12,7 @@ service.interceptors.request.use(
   (config) => {
     // 跨域
     config.withCredentials = true;
-    const token = localStorage.getItem('token');
+    const token = JSON.parse(localStorage.getItem('user') || '{}').token;
     // 如果有token，则在请求头中添加Authorization字段
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

@@ -3,10 +3,13 @@ import vue from '@vitejs/plugin-vue'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { YikeResolver } from '@yike-design/resolver'
+import VueDevTools from 'vite-plugin-vue-devtools'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
+    // Vue Devtools 调试插件（仅开发环境生效）
+    VueDevTools(),
     AutoImport({ resolvers: [YikeResolver] }),
     Components({ resolvers: [YikeResolver] }),
   ],
