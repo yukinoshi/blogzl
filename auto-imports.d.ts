@@ -6,5 +6,5 @@
 // biome-ignore lint: disable
 export {}
 declare global {
-
+  const YkMessage: typeof import('@yike-design/ui/es')['YkMessage']
 }

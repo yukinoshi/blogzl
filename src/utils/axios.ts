@@ -13,9 +13,9 @@ service.interceptors.request.use(
     // 跨域
     config.withCredentials = true;
     const token = localStorage.getItem('token');
-    // 2. 如果 token 存在，则将其添加到请求头中
+    // 如果有token，则在请求头中添加Authorization字段
     if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },

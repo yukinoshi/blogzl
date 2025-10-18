@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, getCurrentInstance, onMounted } from 'vue';
+import { ref, getCurrentInstance, onMounted, nextTick } from 'vue';
 import { loginApi } from '../api/login';
 
 const proxy: any = getCurrentInstance()?.proxy
@@ -30,6 +30,9 @@ const submit = async () => {
     if (res.code === 200 && res.data?.token) {
       localStorage.setItem('token', res.data.token);
       proxy.$message({ type: 'success', message: '登录成功' })
+      nextTick(() => {
+        proxy.$router.push('/');
+      });
     } else {
       proxy.$message({ type: 'warning', message: '用户名或密码错误' })
     }

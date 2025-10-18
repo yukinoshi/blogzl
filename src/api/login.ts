@@ -4,7 +4,7 @@ import type { UserRegister,IsSuccess,ReturnUserInfo } from "../utils/interface";
 /**
  * 检查用户是否注册 判断接口是可用
  * @param name 用户名
- * @returns 返回是否注册过
+ * @returns 返回是否注册过 401未注册 200已注册
  */
 export const isRegisterApi = async (name: string) => {
   return await service.post('/isRegister', { name });
@@ -25,4 +25,12 @@ export const registerApi = async (user: UserRegister) => {
  */
 export const loginApi = async (name: string, password: string) => {
   return await service.post('/login', { name, password }) as ReturnUserInfo;
+}
+
+/**
+ * 校验token
+ * @returns ReturnUserInfo对象
+ */
+export const verifyApi = async () => {
+  return await service.get('/verify') as ReturnUserInfo;
 }

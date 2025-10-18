@@ -9,6 +9,9 @@ import EditGalleryView from '../views/EditGalleryView.vue'
 import EditArticleView from '../views/EditArticleView.vue'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
+import { verifyApi } from '../api/login';
+import { YkMessage } from '@yike-design/ui';
+import { isTokenExpired } from "../utils/auth";
 const routes = [
   { 
     path: '/',
@@ -32,4 +35,49 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
 })
+
+// 白名单：无需登录
+const whiteList = ['/login', '/register']
+
+router.beforeEach(async (to, _from, next) => {
+  const token = localStorage.getItem('token')
+  const isWhite = whiteList.includes(to.path)
+
+  // 未登录
+  if (!token) {
+    return isWhite ? next() : next('/login')
+  }
+
+  // 本地判定过期
+  if (isTokenExpired(token)) {
+    localStorage.removeItem('token')
+    if (isWhite) return next()
+    YkMessage({ type: 'warning', message: '登录已过期，请重新登录' })
+    return next('/login')
+  }
+
+  // 有 token 且未过期
+  // 在登录/注册页面，若 token 有效则自动跳首页
+  if (isWhite) {
+    try {
+      await verifyApi()
+      return next('/')
+    } catch {
+      // token 无效则清除并留在登录/注册页
+      localStorage.removeItem('token')
+      return next()
+    }
+  }
+
+  // 访问受限页面：向后端校验 token
+  try {
+    await verifyApi()
+    return next()
+  } catch {
+    localStorage.removeItem('token')
+    YkMessage({ type: 'warning', message: '登录已过期，请重新登录' })
+    return next('/login')
+  }
+})
+
 export default router;
