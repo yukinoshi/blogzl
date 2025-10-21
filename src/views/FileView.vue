@@ -14,7 +14,7 @@ import Files from '../components/files/files.vue';
         </yk-space>
       </template>
     </TopTitle>
-    <SubSet></SubSet>
+    <SubSet :type="2"></SubSet>
     <Files :pageSize="12" :subsetId="-1"></Files>
   </yk-space>
 </template>

@@ -1,22 +1,28 @@
 <script setup lang="ts">
 import { getCurrentInstance, ref, watch } from 'vue';
 import type { labelData } from "../../utils/interface";
+import { deleteLabelApi } from '../../api/label';
 type labelProps = {
   label: labelData[]
 }
 const proxy: any = getCurrentInstance()?.proxy
-const props = withDefaults(defineProps<labelProps>(),{})
+const props = withDefaults(defineProps<labelProps>(), {})
 const labelData = ref<labelData[]>([])
 
 const emit = defineEmits(['update:label'])
 
-const deletelabel = (id: string | number) => {
-  let index = labelData.value.findIndex((item: {id: number|string }) => item.id === id);
-  if (index !== -1) {
-    labelData.value.splice(index, 1)
-    proxy.$message({ type: 'primary', message: '删除成功' })
-    // notify parent with updated labels
-    emit('update:label', labelData.value)
+const deletelabel = async (label_id: number) => {
+  const res = await deleteLabelApi(label_id)
+  if (res.code == 200) {
+    let index = labelData.value.findIndex((item: { id: number }) => item.id === label_id);
+    if (index !== -1) {
+      labelData.value.splice(index, 1)
+      proxy.$message({ type: 'primary', message: '删除成功' })
+      // notify parent with updated labels
+      emit('update:label', labelData.value)
+    }
+  } else {
+    proxy.$message({ type: 'warning', message: '删除失败' })
   }
 }
 
@@ -37,7 +43,7 @@ watch(
     <template #tbody>
       <tr v-for="(item, index) in labelData" :key="index" class="yk-table__row">
         <td class="yk-table__cell">
-          {{ item.name }}
+          {{ item.label_name }}
         </td>
 
         <td class="yk-table__cell">

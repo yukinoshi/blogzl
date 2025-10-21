@@ -4,7 +4,6 @@ import Editor from '../components/editor/editor.vue';
 import forms from '../components/forms/forms.vue';
 import { time } from '../utils/moment';
 
-const articleData = ref()
 const proxy: any = getCurrentInstance()?.proxy
 
 const form = ref()
@@ -30,7 +29,6 @@ const submit = (e: number) => {
         moment: new Date(),
       }
     }
-    console.log(request);
   } else {
     proxy.$message({ type: 'warning', message: '标题不能为空' })
   }

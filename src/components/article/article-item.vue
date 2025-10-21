@@ -42,7 +42,7 @@ const updateState = (state: number) => {
                 <span v-for="item in props.data.label" style="padding-right: 4px;">{{ item }}</span>
               </yk-text>
             </yk-text>
-            <yk-text type="third">{{ momentm(props.data.moment) }}</yk-text>
+            <yk-text type="third">{{ props.data.moment }}</yk-text>
             <yk-space>
               <yk-text type="third">
                 <IconEyeOutline />

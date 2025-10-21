@@ -6,7 +6,7 @@ import gallery from '../components/gallery/gallery.vue';
 <template>
     <yk-space dir="vertical" size="l">
         <TopTitle name="摄影图库" :isSearch="true" style="width: 100%; margin-bottom: 8px;" />
-        <SubSet />
+        <SubSet :type="1" />
         <gallery :pagesize="12"/>
     </yk-space>
 </template>

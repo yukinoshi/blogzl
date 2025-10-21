@@ -7,7 +7,7 @@ import Article from '../components/article/article.vue';
 <template>
     <yk-space dir="vertical" size="l">
         <TopTitle name="文章管理" :isSearch="true" style="width: 100%; margin-bottom: 8px;" />
-        <SubSet />
+        <SubSet :type="0" />
         <yk-space style="width: 100%;">
             <Article style="width: 100%; height: 12px;"></Article>
             <labelView style="flex: none; width: 280px;"></labelView>

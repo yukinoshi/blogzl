@@ -2,7 +2,7 @@
 import type { ReplyProps } from './reply.ts'
 
 const props = withDefaults(defineProps<ReplyProps>(), {
-  content: undefined,
+  item: undefined,
   isComment: true
 })
 
@@ -11,23 +11,27 @@ const emits = defineEmits(['delete'])
 const deleteReply = (e:number) => {
   emits('delete', e)
 }
+
 </script>
 <template>
   <yk-space class="reply" size="m">
-    <yk-avatar v-if="isComment" img-url="https://www.huohuo90.com:3003/user/6353b034dd4b583975e77fbe.png" alt=""></yk-avatar>
+    <img class="avatar" v-if="isComment" src="../../assets/avatar.png" alt=""></img>
     <yk-space dir="vertical" size="s" class="reply_main">
       <div class="reply_name">
-        <yk-text strong>{{content.user.name}}</yk-text>
-        <yk-text type="third" style="font-size: 12px;">{{ content.moment }}</yk-text>
+        <yk-text strong>{{item.user_name}}</yk-text>
+        <yk-text type="third" style="font-size: 12px;">{{ item.moment }}</yk-text>
       </div>
-      <yk-text type="secondary">{{ content.comment }}</yk-text>
+      <yk-text type="secondary">{{ item.content }}</yk-text>
       <yk-space size="s" align="center" v-if="isComment">
-        <yk-tag type="primary">
-          {{ content?.article?.title }}
+        <yk-tag type="primary" v-if="item.article">
+          {{ item?.article?.title }}
         </yk-tag>
-        <yk-text type="danger" v-show="content?.complaint! > 0">举报 {{ content?.complaint }}</yk-text>
+        <yk-tag v-else>
+          文章已删除
+        </yk-tag>
+        <yk-text type="danger" v-show="item?.complaint! > 0">举报 {{ item?.complaint }}</yk-text>
       </yk-space>
-      <IconDeleteOutline @click="deleteReply(props!.content!.user!.id)" class="reply_main-delete"/>
+      <IconDeleteOutline @click="deleteReply(props!.item!.id)" class="reply_main-delete"/>
     </yk-space>
   </yk-space>
 </template>
@@ -62,6 +66,12 @@ const deleteReply = (e:number) => {
         display: block;
       }
     }
+  }
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
   }
 }
 </style>

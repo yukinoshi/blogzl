@@ -6,7 +6,7 @@ export type CommentProps = {
 }
 
 export type ReplyProps = {
-  content?: ReplyData;
+  item?: ReplyData;
   isComment: boolean;//是否是评论
 }
 

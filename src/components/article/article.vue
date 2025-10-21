@@ -2,7 +2,9 @@
 import { onMounted, ref, getCurrentInstance } from 'vue';
 import ArticleItem from './article-item.vue';
 import { article } from '../../mock/data';
-import type { articleData } from '../../utils/interface';
+import type { articleData, ReqGetArticle } from '../../utils/interface';
+import { getArticleApi } from '../../api/article';
+import { useArticleStore } from '../../store/article';
 
 const proxy: any = getCurrentInstance()?.proxy
 
@@ -11,6 +13,8 @@ const nowpage = ref<number>(1);
 const articleList = ref<articleData[]>([]);
 
 const count = ref<number>(0);
+
+const articleStore = useArticleStore();
 
 type changeState = {
   id: number,
@@ -28,7 +32,7 @@ const props = defineProps({
   },
   state: {
     type: Number,
-    default: 0
+    default: -1
   },
   serchTerm: {
     type: String,
@@ -36,19 +40,23 @@ const props = defineProps({
   },
 })
 
-const request = {
+const request:ReqGetArticle = {
   pageSize: props.pagesize,
   nowPage: nowpage.value,
   state: props.state,
   subsetId: props.subsetId,
   serchTerm: props.serchTerm,
   count: true,
+  classify: 0 //文章
 }
 
-const getData = (e: boolean) => {
+const getData = async (e: boolean) => {
   if (e) {
     count.value = article.count
   }
+  const res = await getArticleApi(request)
+  articleStore.count = res.data.count
+  articleStore.data = res.data.list
   let arr = article.list.slice(
     (request.nowPage - 1) * request.pageSize,
     request.nowPage * request.pageSize

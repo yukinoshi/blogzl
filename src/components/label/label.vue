@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { label } from '../../mock/data';
 import { onMounted, ref, getCurrentInstance } from 'vue';
-import type { labelData } from "../../utils/interface";
+import type { labelData, ReqAddLabel } from "../../utils/interface";
 import labelManage from "./label-manage.vue";
+import { addLabelApi, getLabelApi } from '../../api/label';
+import { momentm } from '../../utils/moment';
 const proxy: any = getCurrentInstance()?.proxy
 
 const visible = ref(false)
@@ -11,22 +12,32 @@ const emits = defineEmits(['nowlabel'])
 
 const inpultValue = ref<number | string>('')
 
-const actived = ref<string>('-1all')
-
 const cancel = () => {
   inpultValue.value = ''
 }
 
-const confirm = () => {
+let obj = ref<ReqAddLabel>({
+  value: {
+    label_name: '',
+    moment: ''
+  }
+});
+
+const confirm = async () => {
   if (inpultValue.value) {
-    let obj = {
-      id: -2,
-      name: inpultValue.value,
-      value: 0
+    obj.value.value.label_name = inpultValue.value
+    obj.value.value.moment = momentm(new Date())
+    const res = await addLabelApi(obj.value)
+    if (res.code == 200) {
+      let newLabel: labelData = {
+        id: res.data,
+        label_name: inpultValue.value,
+        moment: obj.value.value.moment
+      }
+      labels.value.push(newLabel)
+      inpultValue.value = ''
+      proxy.$message({ type: 'primary', message: '创建成功' })
     }
-    labels.value.push(obj)
-    inpultValue.value = ''
-    proxy.$message({ type: 'primary', message: '创建成功' })
   } else {
     proxy.$message({ type: 'warning', message: '输入不能为空' })
   }
@@ -36,19 +47,9 @@ const showmodel = () => {
   visible.value = !visible.value
 }
 const labels = ref<labelData[]>([])
-const rawlabel = (newVal?: labelData[]) => {
-  if (newVal && Array.isArray(newVal)) {
-    labels.value = newVal
-  } else {
-    labels.value = label.list
-  }
-}
-
-const changeOption = (id: number | string, type: string) => {
-  if (id + type != actived.value) {
-    actived.value = id + type
-    emits('nowlabel', { id, type })
-  }
+const rawlabel = async () => {
+  const res = await getLabelApi()
+  labels.value = res.data
 }
 
 onMounted(() => {
@@ -80,10 +81,8 @@ onMounted(() => {
       </yk-space>
     </div>
     <yk-space wrap size="s">
-
-      <yk-tag @click="changeOption(item.id, 'label')" v-for="item in labels" :key="item.id"
-        :class="{ 'label_menu_actived': actived == item.id + 'label' }">
-        {{ item.name }}
+      <yk-tag v-for="item in labels" :key="item.id">
+        {{ item.label_name }}
       </yk-tag>
     </yk-space>
   </div>
@@ -102,12 +101,14 @@ onMounted(() => {
   background-color: @bg-color-l;
   flex: none;
   width: 280px;
+
   &_title {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: @space-l;
   }
+
   .yk-text {
     cursor: pointer;
   }

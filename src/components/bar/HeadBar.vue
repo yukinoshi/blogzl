@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import Information from '../reply/information.vue';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
+import { getUnreadMessageCountApi } from '../../api/overview';
 const router = useRouter()
+let isNewMessage = ref(0);
 const backHome = () => {
   router.push('/')
 }
@@ -10,6 +12,17 @@ const active = ref(false)
 const changeActive = (e:boolean) => {
   active.value = e
 }
+
+const getUnreadMessageCount = async () => {
+  const res = await getUnreadMessageCountApi()
+  if (res.code === 200) {
+    isNewMessage.value = res.data.count || 0;
+  }
+}
+
+onMounted(() => {
+  getUnreadMessageCount()
+})
 
 </script>
 
@@ -20,15 +33,13 @@ const changeActive = (e:boolean) => {
       <span>博客后台</span>
     </yk-space>
     <yk-space align="center" :size="24">
-      <yk-badge is-dot>
+      <yk-badge :count="isNewMessage" :overflow-count="99">
         <IconEmailFill @click="changeActive(true)" style="font-size: 20px;" />
       </yk-badge>
       <!-- 默认图片 -->
       <img src="../../assets/avatar.png" class="avatar" alt="">
       <div><yk-theme></yk-theme></div>
       <yk-button>退出</yk-button>
-      <img src="http://localhost:3000/files/1760773655285.png" alt="">
-
     </yk-space>
     <Information :page-size="8" :active="active" @close="changeActive(false)"></Information>
   </div>
