@@ -2,11 +2,23 @@
 import { ref,getCurrentInstance } from 'vue';
 import Editor from '../components/editor/editor.vue';
 import forms from '../components/forms/forms.vue';
-import { time } from '../utils/moment';
+import { momentm, time } from '../utils/moment';
+import { addArticleApi } from '../api/article';
+import type { ReqArticle } from '../utils/interface';
 
 const proxy: any = getCurrentInstance()?.proxy
 
-const form = ref()
+const form = ref<ReqArticle>({
+  value: {
+    title: '',
+    subset_id: undefined,
+    label: [] as string[],
+    introduce: '',
+    cover: '',
+    moment: '',
+    classify: 0
+  }
+})
 const editor = ref()
 const formData = (e: any) => {
   form.value = e
@@ -15,8 +27,10 @@ const editorData = (e: any) => {
   editor.value = e
 }
 const nowMoment = ref('')
-const submit = (e: number) => {
-  if (form.value && form.value.title) {
+const submit = async (e: number) => {
+  console.log(e);
+  
+  if (form.value.value && form.value.value.title) {
     if (e === 0) {
       nowMoment.value = time(new Date())
     }
@@ -24,13 +38,15 @@ const submit = (e: number) => {
       ...form.value,
       ...{
         content: editor.value,
-        status: e,
+        state: e,
         classify: 0,
-        moment: new Date(),
+        moment: momentm(new Date()),
       }
     }
+    const res = await addArticleApi(request);
+    console.log(res);
   } else {
-    proxy.$message({ type: 'warning', message: '标题不能为空' })
+    proxy.$message({ type: 'warning', message: '标题不能为空1' })
   }
 
 }

@@ -203,3 +203,16 @@ export type ResFileData = Code & {
     subset_id?: number;//所属类型
   }
 }
+export type ReqArticle = {
+  value: {
+    title: string;
+    subset_id?: number;
+    classify: number;
+    label?: string[];
+    introduce?: string;//简介 
+    content?: string | string[];//内容
+    cover?: string;//封面地址
+    state?: number;//状态0未发布、1已发布
+    moment: string;//时间
+  }
+}

@@ -1,5 +1,5 @@
 import serve from '../utils/axios'
-import type { ReqGetArticle, ResArticleData } from '../utils/interface'
+import type { ReqArticle, ReqGetArticle, Res, ResArticleData } from '../utils/interface'
 
 /**
  * 根据分页 标题简介内容模糊搜索 根据类别搜索文章0或者图库1 根据分类ID 搜索文章
@@ -8,4 +8,8 @@ import type { ReqGetArticle, ResArticleData } from '../utils/interface'
  */
 export const getArticleApi = async (data: ReqGetArticle) => {
   return await serve.post('/article', data) as ResArticleData
+}
+
+export const addArticleApi = async (data: ReqArticle) => {
+  return await serve.post('/createArticle', data) as Res
 }

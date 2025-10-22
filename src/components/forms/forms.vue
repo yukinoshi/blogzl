@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, getCurrentInstance, onMounted, ref, watch } from 'vue';
-import type { Code, labelData, ResFileData, SubsetData } from '../../utils/interface';
+import type { labelData, ReqArticle, ResFileData, SubsetData } from '../../utils/interface';
 import { useSubsetStore } from '../../store/subset';
 import { GetSubsetApi } from '../../api/subset';
 import { getLabelApi } from '../../api/label';
+import { deleteFileApi } from '../../api/files';
 
 const props = defineProps({
   classify: {
@@ -18,17 +19,21 @@ const proxy: any = getCurrentInstance()?.proxy
 const raws = computed(() => {
   return props.classify === 1 ? { minRows: 24, maxRows: 30 } : { minRows: 4, maxRows: 10 }
 })
+let coverId = ref<number>()
 
 const emits = defineEmits(['formData'])
 const subsetStore = useSubsetStore()
 //渲染选择数据
-const formData = ref({
-  title: '',
-  subsetId: null as number | string | null,
-  label: [] as string[],
-  introduce: '',
-  cover: '',
-  file: '',
+const formData = ref<ReqArticle>({
+  value: {
+    title: '',
+    subset_id: undefined,
+    label: [] as string[],
+    introduce: '',
+    cover: '',
+    moment: '',
+    classify: props.classify
+  }
 })
 
 const subsetList = ref<SubsetData[]>([])
@@ -43,52 +48,80 @@ const inputLabel = ref<string>('')
 
 //上传成功回调
 const handleSuccess = (e: ResFileData) => {
-  console.log(e.data?.file_name);
+  formData.value.value.cover = e.data?.url;
+  coverId.value = e.data?.id;
+}
+//删除文件回调
+const handleDelete = async () => {
+  if (coverId.value) {
+    const res = await deleteFileApi(coverId.value);
+    if (res.code !== 200) {
+      proxy?.$message?.({ type: 'warning', message: '删除文件失败' })
+      return
+    }
+    formData.value.value.cover = '';
+    coverId.value = undefined;
+  }
 }
 
 //添加标签
 const addLabel = () => {
-  if (inputLabel.value && !formData.value.label.includes(inputLabel.value) && formData.value.label.length < 3) {
-    formData.value.label.push(inputLabel.value)
+  if (!inputLabel.value) return
+  // 确保 label 为数组
+  const labels = formData.value.value.label ?? (formData.value.value.label = [])
+  if (!labels.includes(inputLabel.value) && labels.length < 3) {
+    labels.push(inputLabel.value)
     inputLabel.value = ''
   }
 }
 //获取标签数据
 const rawLabel = async () => {
-  const res = await getLabelApi();
-  if (res.code != 200) {
-    proxy.$message({ type: 'warning', message: '获取标签失败' })
-    return
+  try {
+    const res = await getLabelApi();
+    if (res.code != 200) {
+      proxy?.$message?.({ type: 'warning', message: '获取标签失败' })
+      return
+    }
+    // 安全兜底：data 可能为 undefined
+    labelDate.value = (res.data ?? []) as labelData[]
+    labelArr.value = (labelDate.value ?? []).map(item => String((item as any)?.label_name ?? ''))
+  } catch (e) {
+    proxy?.$message?.({ type: 'warning', message: '获取标签异常' })
   }
-  labelDate.value = res.data
-  labelArr.value = labelDate.value.map(item => String(item.label_name))
 }
 
 //选择标签
 const selectLabel = (tag: string) => {
-  if (!formData.value.label.includes(tag) && formData.value.label.length < 3) {
-    formData.value.label.push(tag)
+  const labels = formData.value.value.label ?? (formData.value.value.label = [])
+  if (!labels.includes(tag) && labels.length < 3) {
+    labels.push(tag)
   }
 }
 //删除标签
 const deleteTag = (tag: string) => {
-  formData.value.label = formData.value.label.filter(item => item !== tag)
+  const labels = formData.value.value.label ?? []
+  formData.value.value.label = labels.filter(item => item !== tag)
 }
 
 //获取分类数据
 const getSubset = async () => {
-  const res = await GetSubsetApi(props.classify)
-  if (res.code != 200) {
-    proxy.$message({ type: 'warning', message: '获取分组失败' })
-    return
+  try {
+    const res = await GetSubsetApi(props.classify)
+    if (res.code != 200) {
+      proxy?.$message?.({ type: 'warning', message: '获取分组失败' })
+      return
+    }
+    // 安全兜底：data 或 list 可能为 undefined
+    subsetStore.data = (res.data?.list ?? []) as SubsetData[]
+    subsetList.value = subsetStore.data
+  } catch (e) {
+    proxy?.$message?.({ type: 'warning', message: '获取分组异常' })
   }
-  subsetStore.data = res.data.list
-  subsetList.value = subsetStore.data
 }
 
 //选择分类
 const subsetSelect = (e: number) => {
-  formData.value.subsetId = e;
+  formData.value.value.subset_id = e;
   subsetName.value = subsetList.value.find((item: { id: number; }) => item.id === e)?.subset_name || '';
 }
 
@@ -103,16 +136,6 @@ const uploadUrl = computed(() => {
 })
 const fileUrl = ref([])
 
-const uploadHeaders = computed(() => {
-  const token = JSON.parse(localStorage.getItem('user') || '{}').token;
-  if (token) {
-    return {
-      Authorization: `Bearer ${token}`
-    }
-  }
-  return {}
-})
-
 watch(formData, (newVal) => {
   emits('formData', newVal)
 }, { deep: true })
@@ -126,7 +149,7 @@ onMounted(() => {
 <template>
   <div class="form">
     <yk-space dir="vertical" size="xl">
-      <input v-model="formData.title" type="text" class="form-title" placeholder="请输入标题" />
+  <input v-model="formData.value.title" type="text" class="form-title" placeholder="请输入标题" />
       <yk-space align="center">
         <div class="subset">
           <input style="width: 110px; line-height: 28px;" type="text" placeholder="请选择分类" disabled
@@ -139,28 +162,28 @@ onMounted(() => {
           </yk-dropdown>
         </div>
         <yk-space align="center">
-          <yk-tag @close="deleteTag(tag)" v-for="tag, index in formData.label" :key="index" closeable shape="round">
+          <yk-tag @close="deleteTag(tag)" v-for="tag, index in (formData.value.label || [])" :key="index" closeable shape="round">
             {{ tag }}
           </yk-tag>
-          <yk-text v-show="formData.label.length < 3" style="cursor: pointer; white-space: nowrap;" @click="showModal"
+          <yk-text v-show="(formData.value.label?.length ?? 0) < 3" style="cursor: pointer; white-space: nowrap;" @click="showModal"
             type="third">
             插入标签
           </yk-text>
         </yk-space>
       </yk-space>
       <div :class="{ introduce: props.classify === 0 }">
-        <yk-text-area v-model="formData.introduce" placeholder="请输入简介" :max-length="800"
+        <yk-text-area v-model="formData.value.introduce" placeholder="请输入简介" :max-length="800"
           :auto-size="raws"></yk-text-area>
       </div>
     </yk-space>
     <div class="form-cover" v-if="props.classify === 0">
-      <yk-upload @handleSuccess="handleSuccess" :headers="uploadHeaders" :limit="1" accept="image/*" desc="封面800X600" :upload-url="uploadUrl" :file-list="fileUrl"></yk-upload>
+      <yk-upload @handleDelete="handleDelete" @handleSuccess="handleSuccess" :limit="1" accept="image/*" desc="封面800X600" :upload-url="uploadUrl" :file-list="fileUrl"></yk-upload>
     </div>
     <yk-modal :show-footer="false" v-model="visible" title="标签" size="s">
       <yk-space dir="vertical" size="l">
         <yk-input v-model="inputLabel" placeholder="请输入标签" style="width: 280px;" @submit="addLabel" />
         <yk-space size="s">
-          <yk-tag @close="deleteTag(tag)" v-for="tag, index in formData.label" :key="index" closeable shape="round">
+          <yk-tag @close="deleteTag(tag)" v-for="tag, index in (formData.value.label || [])" :key="index" closeable shape="round">
             {{ tag }}
           </yk-tag>
         </yk-space>

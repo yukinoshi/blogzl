@@ -16,7 +16,7 @@ const emits = defineEmits(['editors'])
 const editorRef = shallowRef()
 
 // 内容 HTML
-const valueHtml = ref('<p>hello</p>')
+const valueHtml = ref('')
 
 const toolbarConfig: Partial<IToolbarConfig> = {
   toolbarKeys: [
