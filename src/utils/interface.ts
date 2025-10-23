@@ -35,7 +35,7 @@ export type labelData = {
 export type articleData = {
   id: number;
   title: string;
-  subsetId?: number;
+  subset_id?: number;
   moment: string;//时间
   label?: string[];
   introduce?: string;//简介 
@@ -44,6 +44,7 @@ export type articleData = {
   state: number;//状态0未发布、1已发布
   comment: number;//评论数
   praise: number;//点赞次数
+  content?: string;
 }
 
 export type galleryData = {
@@ -215,4 +216,13 @@ export type ReqArticle = {
     state?: number;//状态0未发布、1已发布
     moment: string;//时间
   }
+}
+
+export type ReqUpdateArticle = ReqArticle & {
+  id: number;
+}
+
+export type ReqArticleState = {
+  articleId: number
+  state: number
 }

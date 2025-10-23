@@ -1,15 +1,21 @@
 <script setup lang="ts">
-import { computed, getCurrentInstance, onMounted, ref, watch } from 'vue';
+import { computed, getCurrentInstance, onMounted, ref, watch, PropType } from 'vue';
 import type { labelData, ReqArticle, ResFileData, SubsetData } from '../../utils/interface';
 import { useSubsetStore } from '../../store/subset';
 import { GetSubsetApi } from '../../api/subset';
 import { getLabelApi } from '../../api/label';
 import { deleteFileApi } from '../../api/files';
+import type { articleData } from '../../utils/interface';
+import { baseImgUrl } from '../../utils/env';
 
 const props = defineProps({
   classify: {
     default: 0,
     type: Number
+  },
+  editInfo: {
+    default: () => ({} as articleData),
+    type: Object as PropType<articleData>
   }
 })
 
@@ -38,7 +44,18 @@ const formData = ref<ReqArticle>({
 
 const subsetList = ref<SubsetData[]>([])
 
-const subsetName = ref<string|number>('')
+const subsetName = ref<string | number>('')
+// —— 回显辅助：规范 id 并根据 id 查找名称 ——
+const normalizeId = (v: unknown): number | undefined => {
+  const n = Number(v)
+  return Number.isFinite(n) ? n : undefined
+}
+const updateSubsetNameById = (rawId: unknown) => {
+  const id = normalizeId(rawId)
+  if (id == null) return
+  const hit = subsetList.value.find(it => normalizeId((it as any).id) === id)
+  subsetName.value = (hit as any)?.subset_name ?? ''
+}
 //存在的标签数组数据
 const labelDate = ref<labelData[]>([])
 //渲染的标签数组
@@ -61,6 +78,7 @@ const handleDelete = async () => {
     }
     formData.value.value.cover = '';
     coverId.value = undefined;
+    fileUrl.value = []
   }
 }
 
@@ -114,6 +132,8 @@ const getSubset = async () => {
     // 安全兜底：data 或 list 可能为 undefined
     subsetStore.data = (res.data?.list ?? []) as SubsetData[]
     subsetList.value = subsetStore.data
+    const idFromProps = (props.editInfo as any)?.subsetId ?? (props.editInfo as any)?.subset_id
+    updateSubsetNameById(formData.value.value.subset_id ?? idFromProps)
   } catch (e) {
     proxy?.$message?.({ type: 'warning', message: '获取分组异常' })
   }
@@ -134,7 +154,12 @@ const uploadUrl = computed(() => {
   const token = JSON.parse(localStorage.getItem('user') || '{}').token
   return token ? `/api/upload?token=${encodeURIComponent(token)}` : `/api/upload`
 })
-const fileUrl = ref([])
+const fileUrl = ref([
+  // {
+  //   name: '默认图片',
+  //   url: ''
+  // }
+])
 
 watch(formData, (newVal) => {
   emits('formData', newVal)
@@ -143,13 +168,37 @@ watch(formData, (newVal) => {
 onMounted(() => {
   getSubset()
   rawLabel()
+
 })
+// 当分类列表异步返回后，再根据已有的 subset_id 补一次名称回显
+watch(
+  () => subsetList.value,
+  (list) => {
+    if (!list || list.length === 0) return
+    const rawId = formData.value.value.subset_id ?? (props.editInfo as any)?.subsetId ?? (props.editInfo as any)?.subset_id
+    updateSubsetNameById(rawId)
+  },
+  { deep: false, immediate: true }
+)
+
+watch(() => props.editInfo, (newVal) => {
+  if (newVal && newVal.id) {
+    formData.value.value.title = newVal.title
+    formData.value.value.subset_id = (newVal as any).subsetId ?? (newVal as any).subset_id
+    // 列表可能尚未就绪，这里也先行回显一次，列表到达后 watch(subsetList) 会再次兜底
+    updateSubsetNameById(formData.value.value.subset_id)
+    formData.value.value.label = newVal.label || []
+    formData.value.value.introduce = newVal.introduce
+    formData.value.value.cover = newVal.cover
+    fileUrl.value =[{ name: '封面', url: baseImgUrl + formData.value.value.cover }]
+  }
+}, { deep: true })
 </script>
 
 <template>
   <div class="form">
     <yk-space dir="vertical" size="xl">
-  <input v-model="formData.value.title" type="text" class="form-title" placeholder="请输入标题" />
+      <input v-model="formData.value.title" type="text" class="form-title" placeholder="请输入标题" />
       <yk-space align="center">
         <div class="subset">
           <input style="width: 110px; line-height: 28px;" type="text" placeholder="请选择分类" disabled
@@ -162,11 +211,12 @@ onMounted(() => {
           </yk-dropdown>
         </div>
         <yk-space align="center">
-          <yk-tag @close="deleteTag(tag)" v-for="tag, index in (formData.value.label || [])" :key="index" closeable shape="round">
+          <yk-tag @close="deleteTag(tag)" v-for="tag, index in (formData.value.label || [])" :key="index" closeable
+            shape="round">
             {{ tag }}
           </yk-tag>
-          <yk-text v-show="(formData.value.label?.length ?? 0) < 3" style="cursor: pointer; white-space: nowrap;" @click="showModal"
-            type="third">
+          <yk-text v-show="(formData.value.label?.length ?? 0) < 3" style="cursor: pointer; white-space: nowrap;"
+            @click="showModal" type="third">
             插入标签
           </yk-text>
         </yk-space>
@@ -177,13 +227,15 @@ onMounted(() => {
       </div>
     </yk-space>
     <div class="form-cover" v-if="props.classify === 0">
-      <yk-upload @handleDelete="handleDelete" @handleSuccess="handleSuccess" :limit="1" accept="image/*" desc="封面800X600" :upload-url="uploadUrl" :file-list="fileUrl"></yk-upload>
+      <yk-upload @handleDelete="handleDelete" @handleSuccess="handleSuccess" :limit="1" accept="image/*"
+        desc="封面800X600" :upload-url="uploadUrl" :file-list="fileUrl"></yk-upload>
     </div>
     <yk-modal :show-footer="false" v-model="visible" title="标签" size="s">
       <yk-space dir="vertical" size="l">
         <yk-input v-model="inputLabel" placeholder="请输入标签" style="width: 280px;" @submit="addLabel" />
         <yk-space size="s">
-          <yk-tag @close="deleteTag(tag)" v-for="tag, index in (formData.value.label || [])" :key="index" closeable shape="round">
+          <yk-tag @close="deleteTag(tag)" v-for="tag, index in (formData.value.label || [])" :key="index" closeable
+            shape="round">
             {{ tag }}
           </yk-tag>
         </yk-space>

@@ -1,12 +1,12 @@
 import serve from '../utils/axios'
-import type { Code } from '../utils/interface'
+import type { Code, ResFileData } from '../utils/interface'
 /**
  * 上传单个文件
  * @param data 上传文件
  * @returns 返回上传成功文件的信息
  */
-export const uploadFileApi = async (data: object) => {
-  return await serve.post('/upload', data)
+export const uploadFileApi = async (data: FormData) => {
+  return await serve.post('/upload', data) as ResFileData
 }
 /**
  * 根据文件id删除文件

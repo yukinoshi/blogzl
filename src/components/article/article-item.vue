@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useSubsetStore } from '../../store/subset';
 import type { articleData } from '../../utils/interface'
-import { momentm } from '../../utils/moment'
+import { baseImgUrl } from '../../utils/env';
+import router from '../../router';
 const emits = defineEmits(['delete', 'state'])
 const subsetStore = useSubsetStore();
 type ArticleItemProps = {
@@ -11,7 +12,7 @@ type ArticleItemProps = {
 
 const props = withDefaults(defineProps<ArticleItemProps>(), {})
 const cover = computed(() => {
-  return './src/assets/image/' + props.data.cover
+  return props.data.cover ? baseImgUrl + props.data.cover : ''
 })
 const deleteArticle = () => {
   emits('delete', props.data.id)
@@ -20,6 +21,14 @@ const deleteArticle = () => {
 const updateState = (state: number) => {
   emits('state', { id: props.data.id, state: state })
 }
+
+const editArticle = (id: number) => {
+  //跳转到编辑页面
+  router.push({ path: '/editarticle', query: { id: id.toString() } })
+}
+onMounted(() => {
+  
+})
 
 </script>
 
@@ -36,7 +45,7 @@ const updateState = (state: number) => {
         <div class="article-item-type">
           <yk-space size="xl">
             <yk-text type="secondary">
-              {{ subsetStore.subsetName(props.data.subsetId) }}
+              {{ subsetStore.subsetName(props.data.subset_id) }}
               <yk-text type="secondary" v-if="props.data!.label!.length > 0">
                 /
                 <span v-for="item in props.data.label" style="padding-right: 4px;">{{ item }}</span>
@@ -66,7 +75,7 @@ const updateState = (state: number) => {
               <IconBackOutline @click="updateState(0)" />
             </yk-tooltip>
             <yk-tooltip title="编辑" placement="top">
-              <IconFillOutline />
+              <IconFillOutline @click="editArticle(props.data.id)" />
             </yk-tooltip>
             <yk-popconfirm content="删除后不可回复" trigger="click" placement="topRight" title="删除后不可恢复" @confirm="deleteArticle()">
                 <IconDeleteOutline />

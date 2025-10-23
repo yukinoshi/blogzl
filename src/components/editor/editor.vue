@@ -1,14 +1,23 @@
 <script lang="ts" setup>
 import './index.less' // 引入 css
-import { onBeforeUnmount, ref, shallowRef, onMounted } from 'vue'
+import { onBeforeUnmount, ref, shallowRef,watch } from 'vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import type { IToolbarConfig, IEditorConfig } from '@wangeditor/editor';
 import { colors } from "./colors.js";
+import { uploadFileApi } from '../../api/files.js';
+import { baseImgUrl } from '../../utils/env.js';
 
 const top = ref<boolean>(false)
 const toolbarTop = (e: boolean) => {
   top.value = e
 }
+
+const props = defineProps({
+  editcontent: {
+    default: '',
+    type: String
+  }
+})
 
 const emits = defineEmits(['editors'])
 
@@ -17,7 +26,7 @@ const editorRef = shallowRef()
 
 // 内容 HTML
 const valueHtml = ref('')
-
+// 编辑器模式
 const toolbarConfig: Partial<IToolbarConfig> = {
   toolbarKeys: [
     // 菜单 key
@@ -80,8 +89,28 @@ const editorConfig: Partial<IEditorConfig> = {
       colors,
     },
     uploadImage: {
-      customInsert(res: any, insertFn: InsertFnType) {
-        // insertFn(url,alt, href)
+      // 自定义上传
+      async customUpload(file: File, insertFn: (url: string, alt?: string, href?: string) => void) {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        try {
+          const res = await uploadFileApi(formData);
+          // axios 的响应数据在 res.data 中
+          // 并且您的后端返回格式为 { code: 200, data: { url: '...' } }
+          if (res.code === 200 && res.data?.url) {
+            // 上传成功，调用 insertFn 将图片 url 插入编辑器
+            const {data: file} = res;
+            insertFn(baseImgUrl + file.url,file.file_name,file.url);
+          } else {
+            // 您可以在此处理上传失败的情况
+            alert(`图片上传失败: ${res.code}`);
+            console.error('图片上传失败:', res.code);
+          }
+        } catch (error) {
+          alert('图片上传请求出错');
+          console.error('图片上传请求出错:', error);
+        }
       }
     }
   },
@@ -103,7 +132,9 @@ const onChange = () => {
   emits('editors', valueHtml.value)
 }
 
-
+watch(() => props.editcontent, (newVal) => {
+  valueHtml.value = newVal
+})
 
 
 </script>
@@ -116,8 +147,8 @@ const onChange = () => {
   <div class="editor-main">
     <slot>
     </slot>
-    <Editor style="min-height: 500px; width: 820px; overflow-y: hidden;" v-model="valueHtml" :defaultConfig="editorConfig"
-      :mode="mode" @onCreated="handleCreated" @onChange="onChange" />
+    <Editor style="min-height: 500px; width: 820px; overflow-y: hidden;" v-model="valueHtml"
+      :defaultConfig="editorConfig" :mode="mode" @onCreated="handleCreated" @onChange="onChange" />
   </div>
 </template>
 
