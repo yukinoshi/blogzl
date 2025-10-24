@@ -5,19 +5,20 @@ export const useArticleStore = defineStore('article', {
   state: () => {
     return {
       count: 0,
+      tempcount: 0,
+      countUnpublish: 0,
       data: [] as articleData[]
     }
   },
   getters: {
     exclude: (state) => {
-      let n = 0
-      //计算未发布文章数量
-      for (let i = 0; i < state.data.length; i++) {
-        if (state.data[i].state === 0) {
-          n++;
+      state.countUnpublish = 0
+      state.data.map(item => {
+        if (item.state === 0) {
+          state.countUnpublish++
         }
-      }
-      return [{ id: 'unpublish', name: '未发布', value: n },{ id: 'publish', name: '已发布', value: state.count - n }]
+      })
+      return [{ id: 'unpublish', name: '未发布', value: state.countUnpublish }, { id: 'publish', name: '已发布', value: state.tempcount - state.countUnpublish }]
     }
   },
   actions: {

@@ -1,4 +1,3 @@
-
 <script setup lang="ts">
 import { ref } from 'vue';
 
@@ -25,6 +24,10 @@ const canclesearch = () => {
   SearchData.value = ''
 }
 
+const submit = () => {
+  emit('search', SearchData.value)
+}
+
 </script>
 
 <template>
@@ -35,7 +38,9 @@ const canclesearch = () => {
       <yk-button type="secondary" @click="canclesearch" v-show="SearchData">取消搜索</yk-button>
       <yk-input-search v-model="SearchData" style="width: 320px" placeholder="请输入..." @search="search">
         <template #suffix>
-          <yk-button type="secondary"><IconSearchOutline /></yk-button>
+          <yk-button @click="submit" type="secondary">
+            <IconSearchOutline />
+          </yk-button>
         </template>
       </yk-input-search>
     </yk-space>
@@ -43,7 +48,7 @@ const canclesearch = () => {
 </template>
 
 <style lang="less" scoped>
-.top_title{
+.top_title {
   display: flex;
   justify-content: space-between;
   align-items: center;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, getCurrentInstance, onMounted, ref, watch, PropType } from 'vue';
+import { computed, getCurrentInstance, onMounted, ref, watch, type PropType } from 'vue';
 import type { labelData, ReqArticle, ResFileData, SubsetData } from '../../utils/interface';
 import { useSubsetStore } from '../../store/subset';
 import { GetSubsetApi } from '../../api/subset';
@@ -154,12 +154,7 @@ const uploadUrl = computed(() => {
   const token = JSON.parse(localStorage.getItem('user') || '{}').token
   return token ? `/api/upload?token=${encodeURIComponent(token)}` : `/api/upload`
 })
-const fileUrl = ref([
-  // {
-  //   name: '默认图片',
-  //   url: ''
-  // }
-])
+const fileUrl = ref<{ name: string; url: string }[]>([])
 
 watch(formData, (newVal) => {
   emits('formData', newVal)
@@ -190,7 +185,9 @@ watch(() => props.editInfo, (newVal) => {
     formData.value.value.label = newVal.label || []
     formData.value.value.introduce = newVal.introduce
     formData.value.value.cover = newVal.cover
-    fileUrl.value =[{ name: '封面', url: baseImgUrl + formData.value.value.cover }]
+    if (formData.value.value.cover) {
+      fileUrl.value =[{ name: '封面', url:  baseImgUrl + formData.value.value.cover }]
+    }
   }
 }, { deep: true })
 </script>

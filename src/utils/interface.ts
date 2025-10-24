@@ -170,6 +170,13 @@ export type ReqUpdateSubset = {
   subset_name: string | number;
 }
 
+export type ReqSubsetbyId = {
+  value: {
+    id: number;
+    count: number;
+  }[];
+}
+
 export type ResLabelData = Code & {
   data: labelData[];
 }
@@ -188,9 +195,23 @@ export type ReqGetArticle = PageType & {
   classify: number;//类别
 }
 
+export type ReqGetAllArticle = {
+  state?: number;//状态
+  subsetId?: number;//分组
+  serchTerm?: string | number;//搜索词条
+  classify: number;//类别
+}
+
 export type ResArticleData = Code & {
   data: {
     count: number;
+    countUnpublish: number;
+    list: articleData[];
+  };
+}
+
+export type ResAllArticleData = Code & {
+  data: {
     list: articleData[];
   };
 }

@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { useSubsetStore } from '../../store/subset';
-import { onMounted, ref, getCurrentInstance } from 'vue';
+import { onMounted, onActivated, ref, getCurrentInstance, watch } from 'vue';
 import SubSetManage from './subset-manage.vue';
-import { addSubsetApi, GetSubsetApi } from '../../api/subset';
-import type { ReqAddSubset, SubsetData } from '../../utils/interface';
+import { addSubsetApi, GetSubsetApi, getSubsetByIdApi } from '../../api/subset';
+import type { ReqAddSubset, ReqSubsetbyId, SubsetData } from '../../utils/interface';
 import { momentm } from '../../utils/moment';
 import { useArticleStore } from '../../store/article';
 import { getArticleApi } from '../../api/article';
 const proxy: any = getCurrentInstance()?.proxy
-
 const visible = ref(false)
 
 //获取父组件传过来的type
@@ -16,6 +15,10 @@ const props = defineProps({
   type: {
     type: Number,
     default: 2
+  },
+  search: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -29,11 +32,18 @@ let obj = ref<ReqAddSubset>({
   }
 });
 
+const emit = defineEmits(['setSubsetId'])
+
+
 const subsetStore = useSubsetStore();
 
 const articleStore = useArticleStore();
 
 const actived = ref<string>('-1all')
+
+const ReqSubsetId = ref<ReqSubsetbyId>({
+  value: []
+})
 
 const cancel = () => {
   inpultValue.value = ''
@@ -68,7 +78,7 @@ const showmodel = () => {
 
 const rawSubset = async () => {
   const res = await GetSubsetApi(props.type)
-  if (res.code != 200){
+  if (res.code != 200) {
     proxy.$message({ type: 'warning', message: '获取分组失败' })
     return
   }
@@ -76,13 +86,12 @@ const rawSubset = async () => {
   if (props.type == 2) {
     console.log("获取文件");
   } else if (props.type == 0) {
-    const articleStore = useArticleStore();
-    subsetStore.count = articleStore.count
+    subsetStore.count = articleStore.tempcount
   } else {
     const res = await getArticleApi({
       pageSize: 1,
       nowPage: 1,
-      state: -1,
+      state: -2,
       subsetId: -1,
       serchTerm: '',
       count: true,
@@ -93,25 +102,101 @@ const rawSubset = async () => {
     }
   }
 }
-
+//切换分类
 const changeOption = (id: number | string, type: string) => {
   if (id + type != actived.value) {
     actived.value = id + type
   }
+  emit('setSubsetId', id)
+}
+//搜索状态根据搜索的东西重新获取分类数据
+const watchSearch = async () => {
+  // 空数组或未初始化都直接清空并返回
+  if (!articleStore.data || articleStore.data.length === 0) {
+    subsetStore.data = []
+    subsetStore.count = 0
+    return
+  }
+  // 重置构造请求体，避免多次调用叠加
+  ReqSubsetId.value.value = []
+  //获取文章的分类id 然后放到数组 获取到一个就value值+1
+  for (const item of articleStore.data) {
+    const subsetId = item.subset_id
+    if (typeof subsetId === 'number') {
+      const exist = ReqSubsetId.value.value.find((obj) => obj.id === subsetId)
+      if (exist) {
+        exist.count += 1
+        continue
+      }
+      const temp = {
+        id: subsetId,
+        count: 1
+      }
+      ReqSubsetId.value.value.push(temp)
+    }
+  }
+  const res = await getSubsetByIdApi(ReqSubsetId.value)
+  if (res.code != 200) {
+    proxy.$message({ type: 'warning', message: '获取分组失败' })
+    return
+  }
+  // 重置数据，防止重复累加
+  subsetStore.data = []
+  subsetStore.count = 0
+  subsetStore.data = res.data.list
+  subsetStore.count = articleStore.data.length
 }
 
 onMounted(() => {
-  rawSubset()
+  // 只调用一种数据来源，避免并发覆盖
+  if (props.search) {
+    watchSearch()
+  } else {
+    rawSubset()
+  }
 })
+
+// 如果页面使用了 keep-alive，组件被重新激活时也刷新一次，保证无需手动刷新
+onActivated(() => {
+  if (props.search) {
+    watchSearch()
+  } else {
+    rawSubset()
+  }
+})
+
+// 当文章列表增减（新增/删除）时，自动刷新分组数据（按原有逻辑重新拉取）
+watch(
+  () => articleStore.data.length,
+  () => {
+    if (props.search) {
+      watchSearch()
+    } else {
+      rawSubset()
+    }
+  }
+)
+
+// 当总计数变化（例如列表页重新统计）时，也刷新一次
+watch(
+  () => articleStore.tempcount,
+  () => {
+    if (props.search) {
+      watchSearch()
+    } else {
+      rawSubset()
+    }
+  }
+)
 
 </script>
 
 <template>
   <div class="subset">
     <yk-space wrap>
-      <div class="subset_menu" @click="changeOption('-1', 'all')"
+      <div class="subset_menu" @click="changeOption(-1, 'all')"
         :class="{ 'subset_menu_actived': actived == '-1all' }">
-        全部{{ subsetStore.count }}
+        全部{{ articleStore.tempcount }}
       </div>
       <div v-if="props.type === 0" class="subset_menu" @click="changeOption(articleStore.exclude[0].id, 'publish')"
         :class="{ 'subset_menu_actived': actived == articleStore.exclude[0].id + 'publish' }">

@@ -1,5 +1,5 @@
 import serve from '../utils/axios'
-import type { articleData, Code, ReqArticle, ReqArticleState, ReqGetArticle, ReqUpdateArticle, Res, ResArticleData } from '../utils/interface'
+import type { articleData, Code, ReqArticle, ReqArticleState, ReqGetAllArticle, ReqGetArticle, ReqUpdateArticle, Res, ResAllArticleData, ResArticleData } from '../utils/interface'
 
 /**
  * 根据分页 标题简介内容模糊搜索 根据类别搜索文章0或者图库1 根据分类ID 搜索文章
@@ -8,6 +8,22 @@ import type { articleData, Code, ReqArticle, ReqArticleState, ReqGetArticle, Req
  */
 export const getArticleApi = async (data: ReqGetArticle) => {
   return await serve.post('/article', data) as ResArticleData
+}
+/**
+ * 根据所有文章
+ * @param data 搜索文章条件信息
+ * @returns 返回所所有的文章数据
+ */
+export const getAllArticleApi = async (classify: number) => {
+  return await serve.post('/allarticle', { classify }) as ResAllArticleData
+}
+/**
+ * 根据所有文章
+ * @param data 搜索文章条件信息
+ * @returns 返回所有的文章数据
+ */
+export const getAllArticlebyApi = async (data: ReqGetAllArticle) => {
+  return await serve.post('/allarticleby', data) as ResAllArticleData
 }
 /**
  * 新增文章

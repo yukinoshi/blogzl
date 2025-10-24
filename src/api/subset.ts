@@ -1,5 +1,5 @@
 import serve from '../utils/axios'
-import type { Code, ReqAddSubset, ReqUpdateSubset, Res, subsetInfo } from '../utils/interface'
+import type { Code, ReqAddSubset, ReqSubsetbyId, ReqUpdateSubset, Res, subsetInfo } from '../utils/interface'
 
 /**
  * 获取不同类别的分类列表
@@ -32,4 +32,12 @@ export const deleteSubsetApi = async (id: number) => {
  */
 export const updateSubsetApi = async (value: ReqUpdateSubset) => {
   return await serve.post('/updateSubset', value) as Code
+}
+/**
+ * 根据id获取分类信息 带上特定分类的文章数量
+ * @param value 根据id和value获取分类的对象
+ * @returns 返回分类的对象带article数量
+ */
+export const getSubsetByIdApi = async (value: ReqSubsetbyId) => {
+  return await serve.post('/gainSubset', value) as subsetInfo
 }
