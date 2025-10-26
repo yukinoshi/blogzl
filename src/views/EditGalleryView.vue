@@ -68,7 +68,7 @@ const submit = async () => {
       }
     }
     proxy?.$message?.({ type: 'success', message: isEdit.value ? '编辑成功' : '发布成功' })
-    // proxy.$router.push('/gallery');
+    proxy.$router.push('/gallery');
   } else {
     proxy?.$message?.({ type: 'warning', message: '请填写标题' })
   }
