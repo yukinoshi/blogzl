@@ -1,45 +1,108 @@
 <script setup lang="ts">
-import { onMounted, ref, getCurrentInstance } from 'vue'
-import { mphotos } from '../../mock/data'
+import { ref, getCurrentInstance, computed, watch, type PropType } from 'vue'
+import type { articleData, Photo, ResFileData } from '../../utils/interface';
+import { baseImgUrl } from '../../utils/env';
+import { deleteFileApi } from '../../api/files';
 
-interface Photo {
-  id: number;
-  url: string;
-}
+const props = defineProps({
+  classify: {
+    default: 0,
+    type: Number
+  },
+  editcontent: {
+    type: Object as PropType<articleData>
+  },
+  editcover: {
+    type: String as PropType<string>
+  }
+})
+const emits = defineEmits(['editors'])
+
 const photos = ref<Photo[]>([])
-const uploadurl = '';
+const uploadUrl = computed(() => {
+  const token = JSON.parse(localStorage.getItem('user') || '{}').token
+  return token ? `/api/upload?token=${encodeURIComponent(token)}` : `/api/upload`
+})
+// 仅在切换到“不同的编辑对象”时初始化一次，避免编辑表单其它字段变化时把本地新增图片覆盖掉
+const initializedId = ref<number | null>(null)
+watch(
+  () => props.editcontent?.id,
+  (newId) => {
+    if (!newId) return
+    if (initializedId.value === newId) return
+    const ec = props.editcontent
+    try {
+      const c: any = ec?.content
+      let parsed: Photo[] = []
+      if (typeof c === 'string') {
+        parsed = c ? (JSON.parse(c) as Photo[]) : []
+      } else if (Array.isArray(c)) {
+        if (c.length && typeof c[0] === 'string') {
+          // 兼容字符串数组形式
+          parsed = (c as string[]).map((url: string, idx: number) => ({ id: idx + 1, url }))
+        } else {
+          parsed = c as Photo[]
+        }
+      } else {
+        parsed = []
+      }
+      photos.value = parsed
+    } catch {
+      photos.value = []
+    }
+    coverIndex.value = photos.value.find(item => item.url === ec?.cover)?.id || 0
+    initializedId.value = newId
+  },
+  { immediate: true }
+)
+
 const coverIndex = ref<number>(0);
 const proxy: any = getCurrentInstance()?.proxy
-const getphotos = () => {
-  photos.value = mphotos.data;
-  console.log(photos.value);
-}
+
 const changeCover = (id: number) => {
   coverIndex.value = id;
 }
-const deleteImage = (id: number) => {
+const deleteImage = async (id: number) => {
+  const res = await deleteFileApi(id)
+  if (res.code !== 200) {
+    proxy.$message({ type: 'warning', message: '删除失败' })
+    return
+  }
   if (coverIndex.value === id) {
     photos.value = photos.value.filter(item => item.id !== id)
     if (photos.value.length >= 0) {
       coverIndex.value = photos.value[0]?.id || 0;
     }
-    coverIndex.value = -1;
   } else {
     photos.value = photos.value.filter(item => item.id !== id)
   }
   proxy.$message({ type: 'success', message: '删除成功' })
 }
-onMounted(() => {
-  getphotos()
-})
+//图片提交成功
+const handleSuccess = (e: ResFileData) => {
+  if (e.code !== 200) {
+    proxy.$message({ type: 'warning', message: '上传失败' })
+    return
+  }
+  photos.value.push({
+    id: e.data.id,
+    url: e.data.url
+  })
+  coverIndex.value = photos.value[0].id
+  emits('editors', photos.value, coverIndex.value)
+}
+watch([photos, coverIndex], ([newPhotos, newCover]) => {
+  emits('editors', newPhotos, newCover)
+}, { deep: true })
+
 </script>
 
 <template>
   <div class="edit-photo">
-    <yk-upload @handleSuccess="" :upload-url="uploadurl" :draggable="true"></yk-upload>
+    <yk-upload @handleSuccess="handleSuccess" :upload-url="uploadUrl" :draggable="true"></yk-upload>
     <div class="waterfall">
       <div class="waterfall-item" v-for="item in photos" :key="item.id">
-        <img :src="'./src/assets/image/' + item.url" alt="" />
+        <img :src="baseImgUrl + item.url" alt="" />
         <IconStarFill class="waterfall-item-covericon" v-if="coverIndex === item.id" />
         <yk-space size="ss">
           <p class="waterfall-item-tool" v-if="coverIndex !== item.id" @click="changeCover(item.id)">设为封面</p>
@@ -131,6 +194,14 @@ onMounted(() => {
         transition: all 0.3s;
       }
     }
+  }
+}
+</style>
+
+<style lang="less">
+.edit-photo {
+  .yk-upload__file-list {
+    display: none;
   }
 }
 </style>

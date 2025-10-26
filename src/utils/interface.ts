@@ -44,22 +44,15 @@ export type articleData = {
   state: number;//状态0未发布、1已发布
   comment: number;//评论数
   praise: number;//点赞次数
-  content?: string;
+  content?: string | string[] | undefined | Photo[];//内容
 }
 
-export type galleryData = {
+export type galleryData = articleData
+
+
+export interface Photo {
   id: number;
-  title: string;
-  subsetId?: number;
-  moment: Date;//时间
-  label?: string[];
-  introduce?: string;//简介 
-  cover?: string;//封面地址
-  views: number;//查看次数
-  state: number;//状态0未发布、1已发布
-  comment: number;//评论数
-  praise: number;//点赞次数
-  content?: string | string[];//图片地址
+  url: string;
 }
 
 export type diaryData = {
@@ -217,7 +210,7 @@ export type ResAllArticleData = Code & {
 }
 
 export type ResFileData = Code & {
-  data?: {
+  data: {
     id: number;
     url: string;//地址
     file_name: string;//文件名

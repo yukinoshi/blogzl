@@ -184,9 +184,11 @@ watch(() => props.editInfo, (newVal) => {
     updateSubsetNameById(formData.value.value.subset_id)
     formData.value.value.label = newVal.label || []
     formData.value.value.introduce = newVal.introduce
-    formData.value.value.cover = newVal.cover
-    if (formData.value.value.cover) {
-      fileUrl.value =[{ name: '封面', url:  baseImgUrl + formData.value.value.cover }]
+    if (props.classify === 0) {
+      formData.value.value.cover = newVal.cover
+      if (formData.value.value.cover) {
+        fileUrl.value = [{ name: '封面', url: baseImgUrl + formData.value.value.cover }]
+      }
     }
   }
 }, { deep: true })

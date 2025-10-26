@@ -127,6 +127,7 @@ const deleteArticle = async (id: number) => {
     return
   }
   articleList.value = articleList.value.filter(item => item.id !== id)
+  getAllData()
   getData()
   proxy.$message({ type: 'success', message: '删除成功' })
 }

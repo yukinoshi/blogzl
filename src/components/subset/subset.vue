@@ -89,7 +89,7 @@ const rawSubset = async () => {
     subsetStore.count = articleStore.tempcount
   } else {
     const res = await getArticleApi({
-      pageSize: 1,
+      pageSize: 12,
       nowPage: 1,
       state: -2,
       subsetId: -1,

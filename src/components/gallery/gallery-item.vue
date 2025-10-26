@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
+import router from '../../router';
 import type { galleryData } from '../../utils/interface'
-import { momentm } from '../../utils/moment'
+import { baseImgUrl } from '../../utils/env';
 const emits = defineEmits(['delete', 'state'])
 type galleryItemProps = {
   data: galleryData
@@ -9,11 +10,26 @@ type galleryItemProps = {
 
 const props = withDefaults(defineProps<galleryItemProps>(), {})
 const cover = computed(() => {
-  return './src/assets/image/' + props.data.cover
+  return props.data.cover ? baseImgUrl + props.data.cover : ''
 })
 const deletegallery = () => {
   emits('delete', props.data.id)
 }
+
+const cleanCoverInContent = () => {// 如果封面图在内容中，则将其移除
+  if (props.data.content && props.data.content.length > 0) {
+    props.data.content = props.data.content.filter(item => item.url !== props.data.cover);
+  }
+}
+
+const editGallery = (id: number) => {
+    //跳转到编辑页面
+  router.push({ path: '/editgallery', query: { id: id.toString() } })
+}
+
+onMounted(() => {
+  cleanCoverInContent();
+})
 
 
 </script>
@@ -28,22 +44,22 @@ const deletegallery = () => {
         <yk-space :size="2">
           <div class="gallery-item-image-left image-div">
             <yk-image v-if="props.data.content && props.data.content[0]"
-              :src="'./src/assets/image/' + props.data.content[0]" fit="cover" width="78" height="78" :preview="false"
+              :src="baseImgUrl + props.data.content[0].url" fit="cover" width="78" height="78" :preview="false"
               :is-lazy="true" />
           </div>
           <div class="gallery-item-image-center image-div">
             <yk-image v-if="props.data.content && props.data.content[1]"
-              :src="'./src/assets/image/' + props.data.content[1]" fit="cover" width="78" height="78" :preview="false"
+              :src="baseImgUrl + props.data.content[1].url" fit="cover" width="78" height="78" :preview="false"
               :is-lazy="true" />
           </div>
           <div class="gallery-item-image-right image-div">
             <yk-image v-if="props.data.content && props.data.content[2]"
-              :src="'./src/assets/image/' + props.data.content[2]" fit="cover" width="78" height="78" :preview="false"
+              :src="baseImgUrl + props.data.content[2].url" fit="cover" width="78" height="78" :preview="false"
               :is-lazy="true" />
           </div>
         </yk-space>
         <yk-space :size="4" class="gallery-item-type-action">
-          <IconFillOutline />
+          <IconFillOutline @click="editGallery(props.data.id)" />
           <yk-popconfirm content="删除后不可回复" trigger="click" placement="topRight" title="删除后不可恢复"
             @confirm="deletegallery()">
             <IconDeleteOutline />
@@ -65,7 +81,7 @@ const deletegallery = () => {
               </yk-text>
             </yk-space>
           </yk-space>
-          <yk-text type="third">{{ momentm(props.data.moment) }}</yk-text>
+          <yk-text type="third">{{ props.data.moment }}</yk-text>
 
         </div>
       </div>

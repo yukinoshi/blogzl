@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import './index.less' // 引入 css
-import { onBeforeUnmount, ref, shallowRef,watch } from 'vue'
+import { onBeforeUnmount, ref, shallowRef,watch, type PropType } from 'vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import type { IToolbarConfig, IEditorConfig } from '@wangeditor/editor';
 import { colors } from "./colors.js";
@@ -15,7 +15,7 @@ const toolbarTop = (e: boolean) => {
 const props = defineProps({
   editcontent: {
     default: '',
-    type: String
+    type: [String, Array] as PropType<string | string[]>
   }
 })
 

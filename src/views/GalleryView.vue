@@ -2,12 +2,25 @@
 import TopTitle from '../components/bar/TopTitle.vue';
 import SubSet from '../components/subset/subset.vue';
 import gallery from '../components/gallery/gallery.vue';
+import { ref } from 'vue';
+
+const searchTerm = ref<string>('');
+
+const subsetId = ref<number | string>(-1);//-1表示全部
+
+const search = (e: string) => {
+  searchTerm.value = e;
+}
+
+const setSubsetId = (e: number | string) => {
+  subsetId.value = e;
+}
 </script>
 <template>
     <yk-space dir="vertical" size="l">
-        <TopTitle name="摄影图库" :isSearch="true" style="width: 100%; margin-bottom: 8px;" />
-        <SubSet :type="1" />
-        <gallery :pagesize="12"/>
+        <TopTitle @search="search" name="摄影图库" :isSearch="true" style="width: 100%; margin-bottom: 8px;" />
+        <SubSet @setSubsetId="setSubsetId" :search="searchTerm.length > 0" :type="1" />
+        <gallery :gallerysubset="subsetId" :serchTerm="searchTerm" :pagesize="12"/>
     </yk-space>
 </template>
 <style lang="less" scoped></style>

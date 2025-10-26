@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, getCurrentInstance, onMounted, reactive } from 'vue';
+import { ref, getCurrentInstance, onMounted } from 'vue';
 import Editor from '../components/editor/editor.vue';
 import forms from '../components/forms/forms.vue';
 import { momentm, time } from '../utils/moment';
@@ -17,7 +17,7 @@ const form = ref<ReqArticle>({
     introduce: '',
     cover: '',
     moment: '',
-    classify: 0
+    classify: 0 //文章
   }
 })
 const editor = ref()
