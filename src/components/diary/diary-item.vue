@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { diaryData } from '../../utils/interface'
+import type { diaryData, Photo } from '../../utils/interface'
 import { weathers } from '../../utils/weather'
-import { momentml } from '../../utils/moment'
-import { computed } from 'vue'
+import { onMounted, ref } from 'vue'
+import { baseImgUrl } from '../../utils/env'
 const emits = defineEmits(['delete'])
 type diaryItemProps = {
   data: diaryData
@@ -13,16 +13,15 @@ const props = withDefaults(defineProps<diaryItemProps>(), {})
 const deletediary = () => {
   emits('delete', props.data.id)
 }
-
-const images = computed(() => {
+const imageList = ref<string[]>([]);
+const images = (() => {
   if (props.data.picture) {
-    let arr = JSON.parse(JSON.stringify(props.data.picture))
-    for (let i = 0; i < arr.length; i++) {
-      arr[i] = './src/assets/image/' + arr[i]
-    }
-    return arr
+    let arr = JSON.parse(props.data.picture) as Photo[]
+    imageList.value = arr.map(item => { return baseImgUrl + item.url })
   }
-  return undefined
+})
+onMounted(() => {
+  images()
 })
 
 
@@ -35,9 +34,9 @@ const images = computed(() => {
         <yk-space dir="vertical" :size="4">
           <p class="diary-item-title">
             {{ props.data.title }}
-            <img :src="'/src/assets/' + weathers[props.data.weatherId].icon" alt="" srcset="">
+            <img :src="'/src/assets/' + weathers[props.data.weather_id].icon" alt="" srcset="">
           </p>
-          <yk-text type="third">{{ momentml(props.data.moment) }}</yk-text>
+          <yk-text type="third">{{ props.data.moment }}</yk-text>
         </yk-space>
         <yk-popconfirm content="删除后不可回复" trigger="click" placement="topRight" title="删除后不可恢复" @confirm="deletediary()">
           <IconDeleteOutline class="diary-item-delete" />
@@ -47,7 +46,7 @@ const images = computed(() => {
         {{ props.data.content }}
       </yk-text>
       <div class="images">
-        <yk-image-preview-group :src-list="images" width="80" height="80" fit="cover"></yk-image-preview-group>
+        <yk-image-preview-group :src-list="imageList" width="80" height="80" fit="cover"></yk-image-preview-group>
       </div>
     </yk-space>
   </div>

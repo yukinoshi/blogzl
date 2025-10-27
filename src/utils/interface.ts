@@ -59,7 +59,7 @@ export type diaryData = {
   id: number;
   title: string;
   moment: Date;//时间
-  weatherId: number;//天气
+  weather_id: number;//天气
   content: string;//内容
   picture?: string[];//图片
 }
@@ -239,4 +239,23 @@ export type ReqUpdateArticle = ReqArticle & {
 export type ReqArticleState = {
   articleId: number
   state: number
+}
+
+export type ReqDiary = PageType & {
+  serchTerm?: string | number;//搜索词条
+}
+
+export type ResDiaryData = Code & {
+  data: {
+    count: number;
+    list: diaryData[];
+  }
+}
+
+export type ReqAddDiary = {
+  title: string;
+  content: string;
+  picture: string[] | string;
+  weather_id: number;
+  moment: string;
 }

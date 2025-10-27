@@ -116,7 +116,6 @@ const deleteArticle = async (id: number) => {
   
   getAllData()
   getData()
-  console.log(galleryList.value);
   proxy.$message({ type: 'success', message: '删除成功' })
 }
 //分页变化
