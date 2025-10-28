@@ -143,8 +143,7 @@ onMounted(() => {
     <div v-if="galleryList.length > 0" class="gallery_pagination">
       <yk-pagination v-model:current="nowpage" @change="changePage" :default-page-size="request.pageSize" :total="count" size="m" />
     </div>
-    <yk-empty description="暂无文章" style="margin: 0 auto;" v-else />
-
+    <yk-empty description="暂无图库" style="margin: 0 auto;" v-else />
   </div>
 </template>
 

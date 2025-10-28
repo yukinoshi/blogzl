@@ -32,6 +32,7 @@ declare module 'vue' {
     HelloWorld: typeof import('./src/components/HelloWorld.vue')['default']
     IconBackOutline: typeof import('@yike-design/ui/es/components/svg-icon')['IconBackOutline']
     IconBulbOutline: typeof import('@yike-design/ui/es/components/svg-icon')['IconBulbOutline']
+    IconCloudUploadOutline: typeof import('@yike-design/ui/es/components/svg-icon')['IconCloudUploadOutline']
     IconCommentOutline: typeof import('@yike-design/ui/es/components/svg-icon')['IconCommentOutline']
     IconDeleteOutline: typeof import('@yike-design/ui/es/components/svg-icon')['IconDeleteOutline']
     IconDownOutline: typeof import('@yike-design/ui/es/components/svg-icon')['IconDownOutline']

@@ -7,6 +7,7 @@ import { getLabelApi } from '../../api/label';
 import { deleteFileApi } from '../../api/files';
 import type { articleData } from '../../utils/interface';
 import { baseImgUrl } from '../../utils/env';
+import { uploadUrl } from '../../hooks/article';
 
 const props = defineProps({
   classify: {
@@ -150,10 +151,6 @@ const showModal = () => {
   visible.value = true
 }
 
-const uploadUrl = computed(() => {
-  const token = JSON.parse(localStorage.getItem('user') || '{}').token
-  return token ? `/api/upload?token=${encodeURIComponent(token)}` : `/api/upload`
-})
 const fileUrl = ref<{ name: string; url: string }[]>([])
 
 watch(formData, (newVal) => {

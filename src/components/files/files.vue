@@ -1,57 +1,76 @@
 <script lang="ts" setup>
-import { onMounted, getCurrentInstance, ref } from 'vue';
-import { mkfiles } from '../../mock/data';
-import type { FileData } from '../../utils/interface';
+import { onMounted, getCurrentInstance, ref, watch } from 'vue';
+import type { FileData, ReqFileData } from '../../utils/interface';
 import FilesItem from './files-item.vue';
 import { useSubsetStore } from '../../store/subset';
 import './files.less'
+import { changeFileSubsetApi, deleteFileApi, getFileApi } from '../../api/files';
 
 const subsetStore = useSubsetStore();
 
 const proxy: any = getCurrentInstance()?.proxy
+
 function cancel() {
+  selectedFilesId.value = []
+  subsetSelectedId.value = undefined
   proxy.$message({ type: 'warning', message: '你点击了取消按钮' })
 }
-function confirm() {
-  proxy.$message({ type: 'primary', message: '你点击了确认按钮' })
+async function confirm() {
+  for (let i = 0; i < selectedFilesId.value.length; i++) {
+    const res = await changeFileSubsetApi({
+      id: selectedFilesId.value[i],
+      subsetId: subsetSelectedId.value!
+    })
+    if (res.code !== 200) {
+      proxy.$message({ type: 'warning', message: '分组修改失败' })
+      return
+    }
+  }
+  emit('CRUDSuccess');
+  proxy.$message({ type: 'primary', message: '分组修改成功' })
 }
-
+const emit = defineEmits(['CRUDSuccess']);
 const files = ref<FileData[]>([])
-type FileProps = {
-  pageSize: number;
-  subsetId: number | string;
-}
 
-const props = withDefaults(defineProps<FileProps>(), {
-  pageSize: 12,
-  subsetId: -1,
+const props = defineProps({
+  pageSize: {
+    type: Number,
+    default: 14
+  },
+  subsetId: {
+    type: Number,
+    default: -2
+  },
+  FileSubset: {
+    type: [Number, String],
+    default: ''
+  }
 })
 
 const count = ref<Number>(0);
-type request = {
-  token?: string;
-  pageSize: number;//单页条数；
-  nowPage: number;//当前页
-}
-const Request: request = {
+const nowPage = ref<number>(1);
+const Request: ReqFileData = {
   pageSize: props.pageSize,
-  nowPage: 1,
+  nowPage: nowPage.value,
+  subsetId: props.subsetId,
+  count: true
 }
 
-const getFiles = (e: boolean) => {
-  const data = mkfiles
-  if (e) {
-    count.value = data.count
+const getFiles = async () => {
+  const res = await getFileApi(Request)
+  if (res.code != 200) {
+    proxy.$message({ type: 'error', message: '获取文件失败' })
+    return
   }
-  files.value = data.list.slice(
-    (Request.nowPage - 1) * Request.pageSize,
-    Request.nowPage * Request.pageSize
-  )
+  count.value = res.data.count;
+  files.value = res.data.list;
   for (let i = 0; i < files.value.length; i++) {
     files.value[i].selected = false
   }
 }
-
+defineExpose({
+  getFiles,
+})
 //被选择ID图片数组
 const selectedFilesId = ref<number[]>([])
 const selectFile = (e: number) => {
@@ -77,37 +96,62 @@ const selectFile = (e: number) => {
   }
 }
 
-const deleteFile = (e: number) => {
-  files.value = files.value.filter(item => item.id !== e)
+const deleteFile = async (e: number) => {
+  const res = await deleteFileApi(e)
+  if (res.code !== 200) {
+    proxy.$message({ type: 'warning', message: '删除失败' })
+    return
+  }
+  proxy.$message({ type: 'success', message: '删除成功' })
+  emit('CRUDSuccess');
+  getFiles()
 }
 
-const deleteFiles = () => {
+const deleteFiles = async () => {
   if (selectedFilesId.value.length > 0) {
+    for (let i = 0; i < selectedFilesId.value.length; i++) {
+      const res = await deleteFileApi(selectedFilesId.value[i])
+      if (res.code !== 200) {
+        proxy.$message({ type: 'warning', message: '删除失败' })
+        return
+      }
+    }
     files.value = files.value.filter(item => !selectedFilesId.value.includes(item.id))
     selectedFilesId.value = []
     checkedAll.value = false
     indeterminate.value = false
   }
+  emit('CRUDSuccess');
+  getFiles()
+  proxy.$message({ type: 'success', message: '删除成功' })
 }
 
-const changeSubset = (e: { subsetId: number | string }) => {
-  proxy.$message({ type: 'primary', message: e.subsetId + '分组修改成功' })
-  
+const changeSubset = async (e: { id: number, subset_id: number }) => {
+  const res = await changeFileSubsetApi({
+    id: e.id,
+    subsetId: e.subset_id
+  })
+  if (res.code !== 200) {
+    proxy.$message({ type: 'warning', message: '分组修改失败' })
+    return
+  }
+  emit('CRUDSuccess');
+  proxy.$message({ type: 'primary', message: '分组修改成功' })
+  getFiles()
 }
-
 
 const changePage = (e: number) => {
   Request.nowPage = e
-  getFiles(false)
+  getFiles()
 }
 
-const subsetSelectedId = ref<number | string>();
-const changeOption = (e: number | string) => {
+const subsetSelectedId = ref<number>();
+const changeOption = (e: number) => {
   subsetSelectedId.value = e
 }
 
 onMounted(() => {
-  getFiles(true)
+  getFiles()
 })
 
 const checkedAll = ref(false)
@@ -138,6 +182,26 @@ const removeAll = () => {
     files.value[i].selected = false
   }
 }
+//当点击分类变化时，重新获取数据
+watch(() => props.FileSubset, async (newVal) => {
+  Request.subsetId = -2;
+  nowPage.value = 1;
+  Request.nowPage = nowPage.value;
+  if (typeof newVal === 'number') {
+    if (newVal !== -1) {
+      Request.subsetId = newVal;
+      count.value = subsetStore.data.filter(item => item.id === newVal).length;
+    } else {//全部
+      Request.subsetId = -2;
+      nowPage.value = 1;
+      Request.nowPage = nowPage.value;
+    }
+    getFiles();
+  } else if (typeof newVal === 'string') {
+    Request.subsetId = -1;
+  }
+  getFiles();
+})
 </script>
 
 <template>
@@ -159,7 +223,7 @@ const removeAll = () => {
             <yk-scrollbar ref="scrollbar" height="148px" class="subset">
               <div :class="{ 'subset-selected': subsetSelectedId == item.id }" @click="changeOption(item.id)"
                 v-for="item in subsetStore.data" class="subset-item" :key="item.id">
-                {{ item.name }} {{ item.value }}
+                {{ item.subset_name }} {{ item.value }}
               </div>
             </yk-scrollbar>
           </template>
@@ -170,9 +234,11 @@ const removeAll = () => {
       <FilesItem @selected="selectFile" @delete="deleteFile" @changeSubsetId="changeSubset" v-for="item in files"
         :key="item.id" :data="item" />
     </div>
-    <div class="files_pagination">
-      <yk-pagination @change="changePage" :total="count" :default-page-size="Request.pageSize" size="m" />
+    <div v-if="files.length > 0" class="files_pagination">
+      <yk-pagination v-model:current="nowPage" @change="changePage" :total="count" :default-page-size="Request.pageSize"
+        size="m" />
     </div>
+    <yk-empty description="暂无文件" style="margin: 0 auto;" v-else />
   </div>
 </template>
 

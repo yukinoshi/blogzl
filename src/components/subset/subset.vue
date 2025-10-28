@@ -7,6 +7,7 @@ import type { ReqAddSubset, ReqSubsetbyId, SubsetData } from '../../utils/interf
 import { momentm } from '../../utils/moment';
 import { useArticleStore } from '../../store/article';
 import { getArticleApi } from '../../api/article';
+import { getFileApi } from '../../api/files';
 const proxy: any = getCurrentInstance()?.proxy
 const visible = ref(false)
 
@@ -84,7 +85,13 @@ const rawSubset = async () => {
   }
   subsetStore.data = res.data.list
   if (props.type == 2) {
-    console.log("获取文件");
+    const res = await getFileApi({
+      subsetId: -2,
+      pageSize: 14,
+      nowPage: 1,
+      count: true,
+    })
+    subsetStore.count = res.data.count
   } else if (props.type == 0) {
     subsetStore.count = articleStore.tempcount
   } else {
@@ -102,6 +109,9 @@ const rawSubset = async () => {
     }
   }
 }
+defineExpose({
+  rawSubset,
+})
 //切换分类
 const changeOption = (id: number | string, type: string) => {
   if (id + type != actived.value) {
@@ -196,7 +206,7 @@ watch(
     <yk-space wrap>
       <div class="subset_menu" @click="changeOption(-1, 'all')"
         :class="{ 'subset_menu_actived': actived == '-1all' }">
-        全部{{ articleStore.tempcount }}
+        全部{{ props.type == 2 ? subsetStore.count : articleStore.tempcount }}
       </div>
       <div v-if="props.type === 0" class="subset_menu" @click="changeOption(articleStore.exclude[0].id, 'publish')"
         :class="{ 'subset_menu_actived': actived == articleStore.exclude[0].id + 'publish' }">

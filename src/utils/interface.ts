@@ -20,9 +20,9 @@ export type SubsetData = {
 export interface FileData {
   id: number;
   url: string;
-  fileName: string | number;
+  file_name: string | number;
   format: string;
-  subsetId: number;
+  subset_id: number;
   selected?: boolean;
 }
 
@@ -209,15 +209,26 @@ export type ResAllArticleData = Code & {
   };
 }
 
-export type ResFileData = Code & {
-  data: {
-    id: number;
-    url: string;//地址
-    file_name: string;//文件名
-    format: string;//格式
-    subset_id?: number;//所属类型
-  }
+export type ReqFileData = PageType & {
+  subsetId?: number | string;//分组
 }
+
+export type ResFileData = Code & {
+  data: FileData;
+}
+
+export type ResPageFileData = Code & {
+  data: {
+    count: number;
+    list: FileData[];
+  };
+}
+
+export type ReqChangeFileSubset = {
+  id: number;//id
+  subsetId: number;//所属分组
+}
+
 export type ReqArticle = {
   value: {
     title: string;

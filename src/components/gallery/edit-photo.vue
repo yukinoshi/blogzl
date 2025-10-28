@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { ref, getCurrentInstance, computed, watch, type PropType } from 'vue'
+import { ref, getCurrentInstance, watch, type PropType } from 'vue'
 import type { articleData, Photo, ResFileData } from '../../utils/interface';
 import { baseImgUrl } from '../../utils/env';
 import { deleteFileApi } from '../../api/files';
+import { uploadUrl } from '../../hooks/article';
 
 const props = defineProps({
   classify: {
@@ -19,10 +20,7 @@ const props = defineProps({
 const emits = defineEmits(['editors'])
 
 const photos = ref<Photo[]>([])
-const uploadUrl = computed(() => {
-  const token = JSON.parse(localStorage.getItem('user') || '{}').token
-  return token ? `/api/upload?token=${encodeURIComponent(token)}` : `/api/upload`
-})
+
 // 仅在切换到“不同的编辑对象”时初始化一次，避免编辑表单其它字段变化时把本地新增图片覆盖掉
 const initializedId = ref<number | null>(null)
 watch(

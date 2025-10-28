@@ -4,15 +4,16 @@ import type { FileData } from "../../utils/interface";
 
 import { useSubsetStore } from '../../store/subset';
 import './files.less'
+import { baseImgUrl } from "../../utils/env";
 
 const subsetStore = useSubsetStore();
 const emits = defineEmits(['changeSubsetId','delete','selected']);
 
 const confirm = () => {
-  if (subsetSelectedId.value !== props.data.subsetId) {
+  if (subsetSelectedId.value !== props.data.subset_id) {
     let data = {
       id: props.data.id,
-      subsetId: subsetSelectedId.value
+      subset_id: subsetSelectedId.value
     }
     emits('changeSubsetId', data)
   }
@@ -34,10 +35,10 @@ const props = withDefaults(defineProps<FileItemProps>(), {
 })
 
 const url = computed(() => {
-  return "/src/assets/image/" + props.data?.url
+  return baseImgUrl + props.data?.url
 })
 
-const subsetSelectedId = ref<number | string>(props.data.subsetId);
+const subsetSelectedId = ref<number | string>(props.data.subset_id);
 
 const changeOption = (e: number | string) => {
   subsetSelectedId.value = e
@@ -57,7 +58,7 @@ const changeOption = (e: number | string) => {
             <yk-scrollbar ref="scrollbar" height="148px" class="subset">
               <div :class="{ 'subset-selected': subsetSelectedId == item.id }" @click="changeOption(item.id)"
                 v-for="item in subsetStore.data" class="subset-item" :key="item.id">
-                {{ item.name }} {{ item.value }}
+                {{ item.subset_name }} {{ item.value }}
               </div>
             </yk-scrollbar>
           </template>
@@ -68,7 +69,7 @@ const changeOption = (e: number | string) => {
         <IconTickMinOutline style="color: #fff; font-size: 24px;" />
       </div>
     </div>
-    <p class="file-item-name">{{ props.data.fileName }}.{{ props.data.format }}</p>
+    <p class="file-item-name">{{ props.data.file_name }}</p>
   </div>
 </template>
 

@@ -5,12 +5,9 @@ import type { Photo, ReqAddDiary, ResFileData } from '../../utils/interface';
 import { deleteFileApi } from '../../api/files';
 import { addDiaryApi } from '../../api/diary';
 import { momentm } from '../../utils/moment';
+import { uploadUrl } from '../../hooks/article';
 const proxy: any = getCurrentInstance()?.proxy
 
-const uploadUrl = computed(() => {
-  const token = JSON.parse(localStorage.getItem('user') || '{}').token
-  return token ? `/api/upload?token=${encodeURIComponent(token)}` : `/api/upload`
-})
 const emit = defineEmits(['refreshDiary'])
 const diaryform = ref<ReqAddDiary>({
   title: '',

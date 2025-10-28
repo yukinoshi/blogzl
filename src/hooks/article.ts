@@ -1,4 +1,4 @@
-import type { Ref } from "vue"
+import { computed, type Ref } from "vue"
 import { getArticleApi } from "../api/article"
 
 export const getData = async (e: boolean, count: Ref<number>, articleStore: any, request: any, articleList: Ref<any[]>) => {
@@ -10,3 +10,8 @@ export const getData = async (e: boolean, count: Ref<number>, articleStore: any,
   articleStore.data = res.data.list
   articleList.value = res.data.list
 }
+
+export const uploadUrl = computed(() => {
+  const token = JSON.parse(localStorage.getItem('user') || '{}').token
+  return token ? `/api/upload?token=${encodeURIComponent(token)}` : `/api/upload`
+})
