@@ -25,7 +25,7 @@ export const navLinks = [
     icon: 'IconFillFill'
   },
   {
-    path: 'settings',
+    path: 'setting',
     name: '设置',
     icon: 'IconSettingsFill'
   }

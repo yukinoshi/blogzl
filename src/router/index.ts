@@ -9,6 +9,7 @@ import EditGalleryView from '../views/EditGalleryView.vue'
 import EditArticleView from '../views/EditArticleView.vue'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
+import SettingView from '../views/SettingView.vue'
 import NotFound from '../views/404.vue'
 import { verifyApi } from '../api/login';
 import { YkMessage } from '@yike-design/ui';
@@ -24,6 +25,7 @@ const routes = [
       { path: '/article', component: ArticleView },
       { path: '/gallery', component: GalleryView },
       { path: '/diary', component: DiaryView },
+      { path: '/setting', component: SettingView },
     ]
   },
   { path: '/editgallery', component: EditGalleryView },
