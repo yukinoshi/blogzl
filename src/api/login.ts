@@ -1,5 +1,5 @@
 import service from "../utils/axios";
-import type { UserRegister,IsSuccess,ReturnUserInfo } from "../utils/interface";
+import type { UserRegister,Code,ReturnUserInfo } from "../utils/interface";
 
 /**
  * 检查用户是否注册 判断接口是可用
@@ -15,7 +15,7 @@ export const isRegisterApi = async (name: string) => {
  * @returns 200注册成功 
  */
 export const registerApi = async (user: UserRegister) => {
-  return await service.post('/insertUser', user) as IsSuccess;
+  return await service.post('/insertUser', user) as Code;
 }
 /**
  * 登录
