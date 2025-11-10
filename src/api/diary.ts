@@ -1,5 +1,5 @@
 import serve from '../utils/axios'
-import type { Code, ReqAddDiary, ReqDiary, Res, ResDiaryData } from '../utils/interface'
+import type { Code, ReqDiary, Res, ResDiaryData } from '../utils/interface'
 /**
  * 请求日记页码数据
  * @param data 请求日记页码数据
