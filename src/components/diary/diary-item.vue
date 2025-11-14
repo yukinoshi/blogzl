@@ -38,7 +38,7 @@ onMounted(() => {
           </p>
           <yk-text type="third">{{ props.data.moment }}</yk-text>
         </yk-space>
-        <yk-popconfirm content="删除后不可回复" trigger="click" placement="topRight" title="删除后不可恢复" @confirm="deletediary()">
+        <yk-popconfirm content="删除后不可恢复" trigger="click" placement="topRight" title="删除后不可恢复" @confirm="deletediary()">
           <IconDeleteOutline class="diary-item-delete" />
         </yk-popconfirm>
       </div>
