@@ -25,6 +25,11 @@ export const navLinks = [
     icon: 'IconFillFill'
   },
   {
+    path: 'resource',
+    name: '资源分享',
+    icon: 'IconAppFill'
+  },
+  {
     path: 'setting',
     name: '设置',
     icon: 'IconSettingsFill'
@@ -56,5 +61,53 @@ export const overLink = [
     total: 0,
     bgColor: '180deg, #00c9f529 0%, #00c9f53d 100%',
   },
-  
+  {
+    path: 'editresource',
+    name: '资源分享',
+    total: 0,
+    bgColor: '180deg, #4d3efa1f 0%, #4d3efa3d 100%',
+  }
+]
+
+export const Format = [
+  {
+    label: 'jpg/png',
+    value: 'jpg/png'
+  },
+  {
+    label: 'pdf',
+    value: 'pdf'
+  },
+  {
+    label: 'sketch',
+    value: 'sketch'
+  },
+  {
+    label: 'psd',
+    value: 'psd'
+  },
+  {
+    label: 'vue',
+    value: 'vue'
+  },
+  {
+    label: 'react',
+    value: 'react'
+  },
+  {
+    label: 'python',
+    value: 'python'
+  },
+  {
+    label: 'java',
+    value: 'java'
+  },
+  {
+    label: 'nodejs',
+    value: 'nodejs'
+  },
+  {
+    label: '其他',
+    value: '其他'
+  }
 ]

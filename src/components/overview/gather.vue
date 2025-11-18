@@ -12,7 +12,7 @@ const drawGatherData = async () => {
     gathers.value[1].total = overviewData.data.article;
     gathers.value[2].total = overviewData.data.gallery;
     gathers.value[3].total = overviewData.data.diary;
-    
+    gathers.value[4].total = overviewData.data.resource;
   }
 }
 const router = useRouter()

@@ -23,6 +23,7 @@ export default defineConfig({
   },
   // 在这里添加 server 配置
   server: {
+    host: '0.0.0.0',
     proxy: {
       '/api': {
         // 使用 127.0.0.1 避免在某些环境下 localhost 解析为 ::1 导致的连接拒绝

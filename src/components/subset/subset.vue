@@ -8,6 +8,7 @@ import { momentm } from '../../utils/moment';
 import { useArticleStore } from '../../store/article';
 import { getArticleApi } from '../../api/article';
 import { getFileApi } from '../../api/files';
+import { getResourcePageApi } from '../../api/resource';
 const proxy: any = getCurrentInstance()?.proxy
 const visible = ref(false)
 
@@ -94,6 +95,14 @@ const rawSubset = async () => {
     subsetStore.count = res.data.count
   } else if (props.type == 0) {
     subsetStore.count = articleStore.tempcount
+  } else if (props.type == 3) {//修改这里，资源分享
+    const res = await getResourcePageApi({
+      subsetId: -2,
+      pageSize: 8,
+      nowPage: 1,
+      count: true,
+    })
+    subsetStore.count = res.data.count
   } else {
     const res = await getArticleApi({
       pageSize: 12,
@@ -204,9 +213,8 @@ watch(
 <template>
   <div class="subset">
     <yk-space wrap>
-      <div class="subset_menu" @click="changeOption(-1, 'all')"
-        :class="{ 'subset_menu_actived': actived == '-1all' }">
-        全部{{ props.type == 2 ? subsetStore.count : articleStore.tempcount }}
+      <div class="subset_menu" @click="changeOption(-1, 'all')" :class="{ 'subset_menu_actived': actived == '-1all' }">
+        全部{{ props.type == 0 ? articleStore.tempcount : subsetStore.count }}
       </div>
       <div v-if="props.type === 0" class="subset_menu" @click="changeOption(articleStore.exclude[0].id, 'publish')"
         :class="{ 'subset_menu_actived': actived == articleStore.exclude[0].id + 'publish' }">
