@@ -45,6 +45,7 @@ export type articleData = {
   comment: number;//评论数
   praise: number;//点赞次数
   content?: string | string[] | undefined | Photo[];//内容
+  coverId?: number;//封面文件id
 }
 
 export type galleryData = articleData
@@ -286,7 +287,8 @@ export type ResourceData = {
   password: string;//提取码
   format: string;//资源格式
   cover?: string;//封面地址
-  downloads: number;//下载次数
+  downloads?: number;//下载次数
+  coverId?: number;//封面文件id
 }
 
 export type ResResourceData = Code & {
@@ -294,4 +296,18 @@ export type ResResourceData = Code & {
     count: number;
     list: ResourceData[];
   }
+}
+
+export type ReqResource = {
+  title: string;
+  subset_id?: number;
+  url: string;//资源链接
+  introduce?: string;//简介 
+  password: string;//提取码
+  format: string;//资源格式
+  cover?: string;//封面地址
+}
+
+export type ReqAddResource = {
+  value: ReqResource;
 }

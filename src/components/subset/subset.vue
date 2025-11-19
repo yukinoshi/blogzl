@@ -234,7 +234,7 @@ watch(
       </div>
     </yk-space>
     <yk-space style="flex: none;">
-      <yk-popconfirm title="新建分组" @cancel="cancel" @confirm="confirm" placement="bottom" trigger="click">
+      <yk-popconfirm title="新建分类" @cancel="cancel" @confirm="confirm" placement="bottom" trigger="click">
         <yk-text type="primary">
           <IconPlusCircleOutline style="margin-right: 4px;" />
           新建

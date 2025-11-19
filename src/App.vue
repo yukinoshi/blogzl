@@ -7,7 +7,6 @@ import HeadBar from './components/bar/HeadBar.vue';
   <HeadBar v-if="$route.meta?.hideHeader !== true" />
   <!-- 内容 -->
   <router-view />
-  
 </template>
 
 <style scoped lang="less">

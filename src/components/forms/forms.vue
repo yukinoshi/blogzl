@@ -26,7 +26,7 @@ const proxy: any = getCurrentInstance()?.proxy
 const raws = computed(() => {
   return props.classify === 1 ? { minRows: 24, maxRows: 30 } : { minRows: 4, maxRows: 10 }
 })
-let coverId = ref<number>()
+let coverId = ref<number>(-1)
 
 const emits = defineEmits(['formData'])
 const subsetStore = useSubsetStore()
@@ -71,14 +71,14 @@ const handleSuccess = (e: ResFileData) => {
 }
 //删除文件回调
 const handleDelete = async () => {
-  if (coverId.value) {
+  if (coverId.value !== -1) {
     const res = await deleteFileApi(coverId.value);
     if (res.code !== 200) {
       proxy?.$message?.({ type: 'warning', message: '删除文件失败' })
       return
     }
     formData.value.value.cover = '';
-    coverId.value = undefined;
+    coverId.value = -1;
     fileUrl.value = []
   }
 }
@@ -185,6 +185,7 @@ watch(() => props.editInfo, (newVal) => {
       formData.value.value.cover = newVal.cover
       if (formData.value.value.cover) {
         fileUrl.value = [{ name: '封面', url: baseImgUrl + formData.value.value.cover }]
+        coverId.value = newVal.coverId;
       }
     }
   }

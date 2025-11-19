@@ -18,9 +18,9 @@ const deleteresource = () => {
   emits('delete', props.data.id)
 }
 
-const editResource = (id: number) => {
+const editResource = () => {
   //跳转到编辑页面
-  router.push({ path: '/editresource', query: { id: id.toString() } })
+  router.push({ path: '/editresource', query: { id: props.data.id.toString() } })
 }
 
 const subsetStore = useSubsetStore();
