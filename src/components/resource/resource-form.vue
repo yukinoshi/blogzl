@@ -101,16 +101,19 @@ const getResourceDataById = async (id: number) => {
     proxy?.$message?.({ type: 'warning', message: '获取资源数据失败' })
     return;
   }
-    form.title = res.data.title;
-    form.subset_id = res.data.subset_id || -2;
-    form.url = res.data.url;
-    form.password = res.data.password;
-    form.introduce = res.data.introduce || '';
-    form.format = res.data.format;
-    form.cover = res.data.cover || '';
+  form.title = res.data.title;
+  form.subset_id = res.data.subset_id || -2;
+  form.url = res.data.url;
+  form.password = res.data.password;
+  form.introduce = res.data.introduce || '';
+  console.log(res.data.format);
+  
+  form.format = res.data.format;
+  if (res.data.cover) {
     coverId.value = res.data.coverId || -1;
-    if (res.data.cover)
-      fileUrl.value = [{ name: '封面', url: baseImgUrl + res.data.cover }]
+    form.cover = res.data.cover || '';
+    fileUrl.value = [{ name: '封面', url: baseImgUrl + res.data.cover }]
+  }
 };
 
 watch(() => props.isEdit, () => {

@@ -16,16 +16,15 @@ const search = (e: string) => {
 const setSubsetId = (e: number | string) => {
   subsetId.value = e;
 }
-
 </script>
 <template>
-    <yk-space dir="vertical" size="l">
-        <TopTitle @search="search" name="文章管理" :isSearch="true" style="width: 100%; margin-bottom: 8px;" />
-        <SubSet @setSubsetId="setSubsetId" :search="searchTerm.length > 0" :type="0" />
-        <yk-space style="width: 100%;">
-            <Article :articlesubset="subsetId" :serchTerm="searchTerm" style="width: 100%; height: 12px;"></Article>
-            <labelView style="flex: none; width: 280px;"></labelView>
-        </yk-space>
+  <yk-space dir="vertical" size="l">
+    <TopTitle @search="search" name="文章管理" :isSearch="true" style="width: 100%; margin-bottom: 8px;" />
+    <SubSet @setSubsetId="setSubsetId" :search="searchTerm.length > 0" :type="0" />
+    <yk-space style="width: 100%;">
+      <Article :articlesubset="subsetId" :serchTerm="searchTerm" style="width: 100%; height: 12px;"></Article>
+      <labelView style="flex: none; width: 280px;"></labelView>
     </yk-space>
+  </yk-space>
 </template>
 <style lang="less" scoped></style>

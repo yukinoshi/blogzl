@@ -2,6 +2,7 @@
 import { ref, getCurrentInstance, onMounted } from 'vue';
 import resourceForm from '../components/resource/resource-form.vue';
 import { addResourceApi, updateResourceByIdApi } from '../api/resource';
+import type { ReqResource } from '../utils/interface';
 
 const proxy: any = getCurrentInstance()?.proxy
 
@@ -14,7 +15,7 @@ const id = ref<number>(-1);
 
 const route = proxy.$route;
 
-const form = ref({
+const form = ref<ReqResource>({
   title: '',
   subset_id: -2,
   url: '',
