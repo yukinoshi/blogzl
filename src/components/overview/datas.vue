@@ -1,20 +1,19 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { LineChart,PieChart } from "../echarts/index";
-import { visit,survey } from '../../mock/data';
-const visitDate = ref([])
-const getVisit = (e:string) => {
-  let data = visit.data
-  if(e === 'week'){
-    data = data.slice(23,30)
-  }
-  visitDate.value = data
+import { survey } from '../../mock/data';
+import { getVisitsStatsApi } from '../../api/visit';
+import type { visitData } from '../../utils/interface';
+const visitDate = ref<visitData[]>([])
+const radio = ref('week');
+const data_radio = ref('week');
+const getVisit = async (e:string) => {
+  const res = await getVisitsStatsApi(e)
+  visitDate.value = res.data
 }
 onMounted(() => {
   getVisit(radio.value)
 })
-const radio = ref('week');
-const data_radio = ref('week');
 </script>
 
 <template>

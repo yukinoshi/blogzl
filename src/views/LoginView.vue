@@ -46,10 +46,6 @@ const submit = async () => {
 const goToRegister = () => {
   proxy.$router.push('/register');
 }
-
-onMounted(() => {
-
-})
 </script>
 
 <template>

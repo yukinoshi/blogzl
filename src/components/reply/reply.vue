@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import type { ReplyProps } from './reply.ts'
+import { useUserStore } from '../../store/user.ts';
+import { avatarList } from '../../utils/avatar.ts';
 
 const props = withDefaults(defineProps<ReplyProps>(), {
   item: undefined,
@@ -12,10 +15,17 @@ const deleteReply = (e:number) => {
   emits('delete', e)
 }
 
+const userStore = useUserStore();
+
+//获取头像
+const avatarUrl = computed(() => {
+  return avatarList[userStore.avatarIndex] || '../../assets/image/avatar.png';
+})
+
 </script>
 <template>
   <yk-space class="reply" size="m">
-    <img class="avatar" v-if="isComment" src="../../assets/avatar.png" alt=""></img>
+    <img class="avatar" v-if="isComment" :src="avatarUrl" alt=""></img>
     <yk-space dir="vertical" size="s" class="reply_main">
       <div class="reply_name">
         <yk-text strong>{{item.user_name}}</yk-text>

@@ -1,5 +1,5 @@
 import service from "../utils/axios";
-import type { UserRegister,Code,ReturnUserInfo } from "../utils/interface";
+import type { UserRegister,Code,ReturnUserInfo, ChangePasswordPayload, ChangeUserNamePayload } from "../utils/interface";
 
 /**
  * 检查用户是否注册 判断接口是可用
@@ -33,4 +33,23 @@ export const loginApi = async (name: string, password: string) => {
  */
 export const verifyApi = async () => {
   return await service.get('/verify') as ReturnUserInfo;
+}
+
+/**
+ * 修改密码
+ * @param payload 修改密码信息
+ * @returns 返回是否成功
+ */
+export const changePasswordApi = async (payload: ChangePasswordPayload) => {
+  return await service.post('/changePassword', payload) as Code;
+}
+
+/**
+ * 修改用户名
+ * @param id 用户id
+ * @param newName 新用户名
+ * @returns 返回是否成功
+ */
+export const changeUserNameApi = async (payload: ChangeUserNamePayload) => {
+  return await service.post('/changeUserName', payload) as Code;
 }

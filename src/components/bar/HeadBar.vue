@@ -1,23 +1,39 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import Information from '../reply/information.vue';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { getUnreadMessageCountApi } from '../../api/overview';
+import { useUserStore } from '../../store/user';
+import { avatarList } from '../../utils/avatar';
+
 const router = useRouter()
 let isNewMessage = ref(0);
-const backHome = () => {
-  router.push('/')
-}
+const userStore = useUserStore();
 const active = ref(false)
+
 const changeActive = (e:boolean) => {
   active.value = e
 }
 
+const backHome = () => {
+  router.push('/')
+}
 const getUnreadMessageCount = async () => {
   const res = await getUnreadMessageCountApi()
   if (res.code === 200) {
     isNewMessage.value = res.data.count || 0;
   }
+}
+
+//获取头像
+const avatarUrl = computed(() => {
+  return avatarList[userStore.avatarIndex] || '../../assets/image/avatar.png';
+})
+
+const logout = () => {
+  //清除token
+  localStorage.removeItem('user');
+  router.push('/login')
 }
 
 onMounted(() => {
@@ -37,9 +53,9 @@ onMounted(() => {
         <IconEmailFill @click="changeActive(true)" style="font-size: 20px;" />
       </yk-badge>
       <!-- 默认图片 -->
-      <img src="../../assets/avatar.png" class="avatar" alt="">
+        <img :src="avatarUrl" class="avatar" alt="">
       <div><yk-theme></yk-theme></div>
-      <yk-button>退出</yk-button>
+      <yk-button @click="logout">退出</yk-button>
     </yk-space>
     <Information :page-size="8" :active="active" @close="changeActive(false)"></Information>
   </div>

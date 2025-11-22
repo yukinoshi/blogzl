@@ -6,6 +6,7 @@ export const useUserStore = defineStore('user', {
       id: -1,
       name: '',
       token: '',
+      avatarIndex: 0,//头像索引
     }
   },
   getters: {

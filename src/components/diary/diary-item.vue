@@ -3,6 +3,7 @@ import type { diaryData, Photo } from '../../utils/interface'
 import { weathers } from '../../utils/weather'
 import { onMounted, ref } from 'vue'
 import { baseImgUrl } from '../../utils/env'
+import { spellImage } from '../../hooks/spelimg'
 const emits = defineEmits(['delete'])
 type diaryItemProps = {
   data: diaryData
@@ -34,7 +35,7 @@ onMounted(() => {
         <yk-space dir="vertical" :size="4">
           <p class="diary-item-title">
             {{ props.data.title }}
-            <img :src="'/src/assets/' + weathers[props.data.weather_id].icon" alt="" srcset="">
+            <img :src="spellImage(weathers[props.data.weather_id].icon)" alt="" srcset="">
           </p>
           <yk-text type="third">{{ props.data.moment }}</yk-text>
         </yk-space>

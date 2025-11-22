@@ -71,6 +71,17 @@ export type UserRegister = {
   moment: string;
 }
 
+export type ChangePasswordPayload = {
+  id: number;
+  oldPassword: string;
+  newPassword: string;
+}
+
+export type ChangeUserNamePayload = {
+  id: number;
+  newName: string;
+}
+
 export type Code = {
   code: number;
 }
@@ -310,4 +321,13 @@ export type ReqResource = {
 
 export type ReqAddResource = {
   value: ReqResource;
+}
+
+export type visitData = {
+  date: string;
+  count: number;
+}
+
+export type ResVisitData = Code & {
+  data: visitData[];
 }
