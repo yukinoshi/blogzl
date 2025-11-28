@@ -28,6 +28,13 @@ export const loginApi = async (name: string, password: string) => {
 }
 
 /**
+ * 退出登录
+ */
+export const logoutApi = async () => {
+  return await service.post('/logout') as Code;
+}
+
+/**
  * 校验token
  * @returns ReturnUserInfo对象
  */

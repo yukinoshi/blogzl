@@ -15,7 +15,8 @@ import ResourceView from '../views/ResourceView.vue';
 import NotFound from '../views/404.vue'
 import { verifyApi } from '../api/login';
 import { YkMessage } from '@yike-design/ui';
-import { isTokenExpired } from "../utils/auth";
+import pinia from '../store'
+import { useUserStore } from '../store/user'
 const routes = [
   {
     path: '/',
@@ -47,43 +48,32 @@ const router = createRouter({
 
 // 白名单：无需登录
 const whiteList = ['/login', '/register']
+const userStore = useUserStore(pinia)
 
 router.beforeEach(async (to, _from, next) => {
-  const user = JSON.parse(localStorage.getItem('user') || '{}')
+  const hasToken = Boolean(userStore.token)
   const isWhite = whiteList.includes(to.path)
-  // 未登录 第一次登录
-  if (!user) {
-    return isWhite ? next() : next('/login')
-  }
 
-  // 本地判定过期
-  if (isTokenExpired(user.token)) {
-    localStorage.removeItem('user')
-    if (isWhite) return next()
-    YkMessage({ type: 'warning', message: '登录已过期，请重新登录' })
-    return next('/login')
-  }
-
-  // 有 token 且未过期
-  // 在登录/注册页面，若 token 有效则自动跳首页
   if (isWhite) {
-    try {      
+    if (!hasToken) return next()
+    try {
       await verifyApi()
       return next('/')
     } catch {
-      // token 无效则清除并留在登录/注册页
-      localStorage.removeItem('user')
+      userStore.clearUser()
       return next()
     }
   }
 
+  if (!hasToken) {
+    return next('/login')
+  }
 
-  // 访问受限页面：向后端校验 token
   try {
     await verifyApi()
     return next()
   } catch {
-    localStorage.removeItem('user')
+    userStore.clearUser()
     YkMessage({ type: 'warning', message: '登录已过期，请重新登录' })
     return next('/login')
   }

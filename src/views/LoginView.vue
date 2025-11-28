@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, getCurrentInstance, onMounted, nextTick } from 'vue';
+import { ref, getCurrentInstance, nextTick } from 'vue';
 import { loginApi } from '../api/login';
 import { useUserStore } from '../store/user';
 
@@ -30,9 +30,7 @@ const submit = async () => {
   if (valid()) {
     const res = await loginApi(user.value.username, user.value.password);
     if (res.code === 200 && res.data?.token) {
-      userStore.id = res.data.id
-      userStore.name = res.data.name
-      userStore.token = res.data.token
+      userStore.setUser({ id: res.data.id, name: res.data.name, token: res.data.token })
       proxy.$message({ type: 'success', message: '登录成功' })
       nextTick(() => {
         proxy.$router.push('/');

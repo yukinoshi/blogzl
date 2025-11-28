@@ -2,16 +2,13 @@
 import { getCurrentInstance, reactive, ref, useTemplateRef } from 'vue';
 import { avatarList } from '../utils/avatar';
 import { useUserStore } from '../store/user';
-import { changePasswordApi, changeUserNameApi } from '../api/login';
+import { changePasswordApi, changeUserNameApi, logoutApi } from '../api/login';
 import type { FormInstance } from '@yike-design/ui/es/components/form';
-
-//获取存储的用户信息
-const userInfo = JSON.parse(localStorage.getItem('user') || '{}');
 
 const userStore = useUserStore();
 
 const form = reactive({
-  username: userInfo.name || '',
+  username: userStore.name || '',
   newPassword: '',
   oldPassword: '',
 })
@@ -19,7 +16,7 @@ const form = reactive({
 const formName = useTemplateRef<FormInstance>('formName')
 const formPassword = useTemplateRef<FormInstance>('formPassword')
 
-const currentAvatarIndex = ref(0);
+const currentAvatarIndex = ref(userStore.avatarIndex || 0);
 const proxy: any = getCurrentInstance()?.proxy
 
 const handleAvatarClick = (index: number) => {
@@ -66,17 +63,17 @@ const changeusername = async () => {
     return
   }
   const result = await formName.value.validate()
-  if (result || form.username === userInfo.name) {
+  if (result || form.username === userStore.name) {
     proxy.$message({ type: 'warning', message: '请填写正确的用户名' });
     return
   }
   const res = await changeUserNameApi({
     newName: form.username,
-    id: userInfo.id
+    id: userStore.id
   });
   if (res.code === 200) {
     proxy.$message({ type: 'warning', message: '用户名修改成功，请重新登录' });
-    localStorage.removeItem('user');
+    userStore.clearUser();
     proxy.$router.push('/login');
   } else {
     proxy.$message('用户名修改失败 code:' + res.code)
@@ -95,11 +92,12 @@ const changepassword = async () => {
   const res = await changePasswordApi({
     newPassword: form.newPassword,
     oldPassword: form.oldPassword,
-    id: userInfo.id
+    id: userStore.id
   });
   if (res.code === 200) {
     proxy.$message({ type: 'warning', message: '密码修改成功，请重新登录' });
-    localStorage.removeItem('user');
+    await logoutApi()
+    userStore.clearUser();
     proxy.$router.push('/login');
   } else {
     proxy.$message({ type: 'warning', message: '密码修改失败 code:' + res.code });

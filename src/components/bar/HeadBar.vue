@@ -5,6 +5,8 @@ import { computed, onMounted, ref } from 'vue';
 import { getUnreadMessageCountApi } from '../../api/overview';
 import { useUserStore } from '../../store/user';
 import { avatarList } from '../../utils/avatar';
+import { logoutApi } from '../../api/login';
+import { YkMessage } from '@yike-design/ui';
 
 const router = useRouter()
 let isNewMessage = ref(0);
@@ -30,10 +32,14 @@ const avatarUrl = computed(() => {
   return avatarList[userStore.avatarIndex] || '../../assets/image/avatar.png';
 })
 
-const logout = () => {
-  //清除token
-  localStorage.removeItem('user');
-  router.push('/login')
+const logout = async () => {
+  try {
+    await logoutApi()
+  } finally {
+    userStore.clearUser()
+    YkMessage({ type: 'success', message: '已退出登录' })
+    router.push('/login')
+  }
 }
 
 onMounted(() => {
