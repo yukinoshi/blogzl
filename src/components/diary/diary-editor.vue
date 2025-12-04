@@ -6,6 +6,7 @@ import { deleteFileApi } from '../../api/files';
 import { addDiaryApi } from '../../api/diary';
 import { momentm } from '../../utils/moment';
 import { uploadUrl } from '../../hooks/article';
+import { spellImage } from '../../hooks/spelimg';
 const proxy: any = getCurrentInstance()?.proxy
 
 const emit = defineEmits(['refreshDiary'])
@@ -86,11 +87,11 @@ const createDiary = async () => {
             <yk-space wrap :size="[32, 20]" style="padding: 16px 0 16px 14px;">
               <div class="diary-editor-weather" v-for="item in weathers"
                 :class="{ selected: diaryform.weather_id === item.id }" :key="item.id" @click="selectWeather(item.id)">
-                <img :src="'/src/assets/' + item.icon" />
+                <img :src="spellImage(weathers[item.id].icon)" />
               </div>
             </yk-space>
           </template>
-          <img :src="'/src/assets/' + weathers[diaryform.weather_id].icon" alt="" srcset="">
+          <img :src="spellImage(weathers[diaryform.weather_id].icon)" alt="" srcset="">
         </yk-popover>
       </div>
       <yk-text-area clearable v-model="diaryform.content" :max-lenght="1600" placeholder="请输入内容" :auto-size="{

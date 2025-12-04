@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, getCurrentInstance, watch } from 'vue';
 import diaryItem from './diary-item.vue';
-import type { diaryData, ReqDiary } from '../../utils/interface';
+import type { diaryData, Photo, ReqDiary } from '../../utils/interface';
 import { deleteDiaryApi, getDiaryApi } from '../../api/diary';
 import { deleteFileApi } from '../../api/files';
 
@@ -49,15 +49,28 @@ const deleteDiary = async (id: number) => {
     proxy.$message({ type: 'error', message: '删除失败' })
     return
   }
-  const temp = diaryList.value.find(item => item.id === id)
-  temp?.picture?.forEach(async (item: any) => {
-    //删除图片
-    const { code } = await deleteFileApi(item.id)
-    if (code !== 200) {
-      proxy.$message({ type: 'warning', message: '删除图片失败' })
-      return
+  const temp = diaryList.value.find(item => item.id === id) as diaryData
+  if (temp?.picture) {
+    let pictures: Photo[] = []
+    if (Array.isArray(temp.picture)) {
+      pictures = temp.picture as unknown as Photo[]
+    } else {
+      try {
+        pictures = JSON.parse(temp.picture as unknown as string) as Photo[]
+      } catch (error) {
+        console.warn('Failed to parse diary pictures', error)
+      }
     }
-  });
+
+    for (const item of pictures) {
+      const { code } = await deleteFileApi(item.id)
+      if (code !== 200) {
+        proxy.$message({ type: 'warning', message: '删除图片失败' })
+        return
+      }
+    }
+  }
+
   diaryList.value = diaryList.value.filter(item => item.id !== id)
   proxy.$message({ type: 'success', message: '删除成功' })
   getData()
@@ -73,7 +86,7 @@ onMounted(() => {
   getData()
 })
 
-watch(() => props.serchTerm, (newVal)=>{
+watch(() => props.serchTerm, (newVal) => {
   request.serchTerm = newVal
   getData()
 })
