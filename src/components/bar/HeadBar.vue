@@ -38,7 +38,7 @@ const logout = async () => {
   } finally {
     userStore.clearUser()
     YkMessage({ type: 'success', message: '已退出登录' })
-    router.push('/login')
+    window.location.href = '/login'
   }
 }
 
