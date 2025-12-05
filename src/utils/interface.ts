@@ -62,7 +62,7 @@ export type diaryData = {
   moment: Date;//时间
   weather_id: number;//天气
   content: string;//内容
-  picture?: string[];//图片
+  picture?: string;//图片
 }
 
 export type UserRegister = {

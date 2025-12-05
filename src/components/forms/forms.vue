@@ -185,7 +185,7 @@ watch(() => props.editInfo, (newVal) => {
       formData.value.value.cover = newVal.cover
       if (formData.value.value.cover) {
         fileUrl.value = [{ name: '封面', url: baseImgUrl + formData.value.value.cover }]
-        coverId.value = newVal.coverId;
+        coverId.value = typeof newVal.coverId === 'number' ? newVal.coverId : -1
       }
     }
   }

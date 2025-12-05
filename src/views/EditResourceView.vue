@@ -24,20 +24,15 @@ const form = ref<ReqResource>({
   format: '',
 })
 
+const buildPayload = () => ({ value: { ...form.value } })
+
 const submit = async () => {
-  let res = {} as any;
+  let res = {} as any
   if (isSubmit.value) {
     if (isEdit.value) {
-      res = await updateResourceByIdApi(
-        id.value,
-        form.value,
-      )
+      res = await updateResourceByIdApi(id.value, buildPayload())
     } else {
-      res = await addResourceApi({
-        value: {
-          ...form.value,
-        }
-      })
+      res = await addResourceApi(buildPayload())
     }
     if (Number(res.code) !== 200) {
       proxy?.$message?.({ type: 'warning', message: '资源发布失败' })

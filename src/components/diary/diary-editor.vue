@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, getCurrentInstance } from 'vue';
+import { ref, getCurrentInstance } from 'vue';
 import { weathers } from '../../utils/weather'
 import type { Photo, ReqAddDiary, ResFileData } from '../../utils/interface';
 import { deleteFileApi } from '../../api/files';

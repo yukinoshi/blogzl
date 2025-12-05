@@ -30,7 +30,7 @@ const props = defineProps({
 const request: ReqResourcePage = {
   pageSize: props.pagesize,
   nowPage: nowpage.value,
-  subsetId: props.subsetId,
+  subsetId: typeof props.subsetId === 'number' ? props.subsetId : -1,
   serchTerm: props.serchTerm,
   count: true,
 }

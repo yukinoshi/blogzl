@@ -29,7 +29,7 @@ const getUnreadMessageCount = async () => {
 
 //获取头像
 const avatarUrl = computed(() => {
-  return avatarList[userStore.avatarIndex] || '../../assets/image/avatar.png';
+  return avatarList[userStore.avatarIndex] ?? avatarList[0]
 })
 
 const logout = async () => {

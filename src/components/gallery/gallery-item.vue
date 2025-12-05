@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import router from '../../router';
-import type { galleryData } from '../../utils/interface'
+import type { galleryData, Photo } from '../../utils/interface'
 import { baseImgUrl } from '../../utils/env';
 const emits = defineEmits(['delete', 'state'])
 type galleryItemProps = {
@@ -16,10 +16,31 @@ const deletegallery = () => {
   emits('delete', props.data.id)
 }
 
-const cleanCoverInContent = () => {// 如果封面图在内容中，则将其移除
-  if (props.data.content && props.data.content.length > 0) {
-    props.data.content = props.data.content.filter(item => item.url !== props.data.cover);
+const galleryContent = ref<Photo[]>([])
+
+const normalizeContent = (payload: galleryData['content']): Photo[] => {
+  if (!payload) return []
+  if (typeof payload === 'string') {
+    try {
+      const parsed = JSON.parse(payload) as Photo[]
+      return Array.isArray(parsed) ? parsed : []
+    } catch (error) {
+      console.warn('解析图集内容失败', error)
+      return []
+    }
   }
+  if (Array.isArray(payload)) {
+    const first = payload[0]
+    if (first && typeof first === 'object') {
+      return payload as Photo[]
+    }
+  }
+  return []
+}
+
+const cleanCoverInContent = () => {
+  const list = normalizeContent(props.data.content)
+  galleryContent.value = list.filter(item => item.url !== props.data.cover)
 }
 
 const editGallery = (id: number) => {
@@ -28,8 +49,15 @@ const editGallery = (id: number) => {
 }
 
 onMounted(() => {
-  cleanCoverInContent();
+  cleanCoverInContent()
 })
+
+watch(
+  () => props.data.content,
+  () => {
+    cleanCoverInContent()
+  }
+)
 
 
 </script>
@@ -43,19 +71,16 @@ onMounted(() => {
         </div>
         <yk-space :size="2">
           <div class="gallery-item-image-left image-div">
-            <yk-image v-if="props.data.content && props.data.content[0]"
-              :src="baseImgUrl + props.data.content[0].url" fit="cover" width="78" height="78" :preview="false"
-              :is-lazy="true" />
+            <yk-image v-if="galleryContent[0]" :src="baseImgUrl + galleryContent[0].url" fit="cover" width="78"
+              height="78" :preview="false" :is-lazy="true" />
           </div>
           <div class="gallery-item-image-center image-div">
-            <yk-image v-if="props.data.content && props.data.content[1]"
-              :src="baseImgUrl + props.data.content[1].url" fit="cover" width="78" height="78" :preview="false"
-              :is-lazy="true" />
+            <yk-image v-if="galleryContent[1]" :src="baseImgUrl + galleryContent[1].url" fit="cover" width="78"
+              height="78" :preview="false" :is-lazy="true" />
           </div>
           <div class="gallery-item-image-right image-div">
-            <yk-image v-if="props.data.content && props.data.content[2]"
-              :src="baseImgUrl + props.data.content[2].url" fit="cover" width="78" height="78" :preview="false"
-              :is-lazy="true" />
+            <yk-image v-if="galleryContent[2]" :src="baseImgUrl + galleryContent[2].url" fit="cover" width="78"
+              height="78" :preview="false" :is-lazy="true" />
           </div>
         </yk-space>
         <yk-space :size="4" class="gallery-item-type-action">

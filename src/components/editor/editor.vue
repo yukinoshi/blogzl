@@ -1,9 +1,10 @@
 <script lang="ts" setup>
 import './index.less' // 引入 css
-import { onBeforeUnmount, ref, shallowRef,watch, type PropType } from 'vue'
+import { onBeforeUnmount, ref, shallowRef, watch, type PropType } from 'vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
-import type { IToolbarConfig, IEditorConfig } from '@wangeditor/editor';
-import { colors } from "./colors.js";
+import type { IToolbarConfig, IEditorConfig } from '@wangeditor/editor'
+import type { Photo } from '../../utils/interface'
+import { colors } from './colors'
 import { uploadFileApi } from '../../api/files.js';
 import { baseImgUrl } from '../../utils/env.js';
 
@@ -15,7 +16,11 @@ const toolbarTop = (e: boolean) => {
 const props = defineProps({
   editcontent: {
     default: '',
-    type: [String, Array] as PropType<string | string[]>
+    type: [String, Array] as PropType<string | string[] | Photo[] | undefined>
+  },
+  mode: {
+    type: String as PropType<'default' | 'simple'>,
+    default: 'default'
   }
 })
 
@@ -100,8 +105,8 @@ const editorConfig: Partial<IEditorConfig> = {
           // 并且您的后端返回格式为 { code: 200, data: { url: '...' } }
           if (res.code === 200 && res.data?.url) {
             // 上传成功，调用 insertFn 将图片 url 插入编辑器
-            const {data: file} = res;
-            insertFn(baseImgUrl + file.url,file.file_name,file.url);
+            const { data: file } = res
+            insertFn(baseImgUrl + file.url, String(file.file_name ?? ''), file.url)
           } else {
             // 您可以在此处理上传失败的情况
             alert(`图片上传失败: ${res.code}`);
@@ -132,9 +137,13 @@ const onChange = () => {
   emits('editors', valueHtml.value)
 }
 
-watch(() => props.editcontent, (newVal) => {
-  valueHtml.value = newVal
-})
+watch(
+  () => props.editcontent,
+  (newVal) => {
+    valueHtml.value = (newVal ?? '') as unknown as string
+  },
+  { immediate: true }
+)
 
 
 </script>
@@ -142,13 +151,13 @@ watch(() => props.editcontent, (newVal) => {
 
 <template>
   <yk-affix :offset="60" @change="toolbarTop">
-    <Toolbar :class="{ istop: top }" class="toolbar" :editor="editorRef" :defaultConfig="toolbarConfig" :mode="mode" />
+    <Toolbar :class="{ istop: top }" class="toolbar" :editor="editorRef" :defaultConfig="toolbarConfig" :mode="props.mode" />
   </yk-affix>
   <div class="editor-main">
     <slot>
     </slot>
     <Editor style="min-height: 500px; width: 820px; overflow-y: hidden;" v-model="valueHtml"
-      :defaultConfig="editorConfig" :mode="mode" @onCreated="handleCreated" @onChange="onChange" />
+      :defaultConfig="editorConfig" :mode="props.mode" @onCreated="handleCreated" @onChange="onChange" />
   </div>
 </template>
 

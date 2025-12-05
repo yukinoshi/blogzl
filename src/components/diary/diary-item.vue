@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { diaryData, Photo } from '../../utils/interface'
 import { weathers } from '../../utils/weather'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { baseImgUrl } from '../../utils/env'
 import { spellImage } from '../../hooks/spelimg'
 const emits = defineEmits(['delete'])
@@ -14,16 +14,35 @@ const props = withDefaults(defineProps<diaryItemProps>(), {})
 const deletediary = () => {
   emits('delete', props.data.id)
 }
-const imageList = ref<string[]>([]);
-const images = (() => {
-  if (props.data.picture) {
-    let arr = JSON.parse(props.data.picture) as Photo[]
-    imageList.value = arr.map(item => { return baseImgUrl + item.url })
+const imageList = ref<string[]>([])
+
+const parsePictures = (payload: diaryData['picture']): Photo[] => {
+  if (!payload) return []
+  if (typeof payload === 'string') {
+    try {
+      const list = JSON.parse(payload) as Photo[]
+      return Array.isArray(list) ? list : []
+    } catch (error) {
+      console.warn('解析日记图片失败', error)
+      return []
+    }
   }
-})
-onMounted(() => {
-  images()
-})
+  return Array.isArray(payload) ? (payload as unknown as Photo[]) : []
+}
+
+const syncImages = () => {
+  const photos = parsePictures(props.data.picture)
+  imageList.value = photos.map(item => baseImgUrl + item.url)
+}
+
+onMounted(syncImages)
+
+watch(
+  () => props.data.picture,
+  () => {
+    syncImages()
+  }
+)
 
 
 </script>
